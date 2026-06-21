@@ -1,0 +1,51 @@
+export type Group = {
+  id: string;
+  creator_handle: string | null;
+  name: string;
+  description: string;
+  claimed: boolean;
+  joins_count: number;
+  external_link: string | null;
+  link_label: string | null;
+  tags: string[];
+  status: string;
+  updated_at: string;
+};
+
+export type EventRow = {
+  id: string;
+  creator_handle: string | null;
+  host_group_id: string | null;
+  host_group_name: string | null;
+  name: string;
+  description: string;
+  starts_at: string;
+  external_link: string | null;
+  tags: string[];
+  status: string;
+};
+
+export type Update = { id: string; body: string; posted_at: string };
+
+export type Comment = {
+  id: string;
+  author_handle: string;
+  body: string;
+  edited: boolean;
+  quote_handle: string | null;
+  quote_text: string | null;
+  created_at: string;
+};
+
+export type Tag = { id: string; name: string; sort: number };
+
+export type Page = {
+  id: string;
+  title: string;
+  slug: string;
+  body: string;
+  in_nav: boolean;
+  is_rules: boolean;
+};
+
+export type SearchResult<T> = { rows: T[]; total: number };
