@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { getSessionUser } from "@/lib/auth";
+import { getUnreadCount } from "@/lib/data";
 
 export default async function Header() {
   const session = await getSessionUser();
   const handle = session?.member?.handle ?? session?.user.email?.split("@")[0];
   const isAdmin = session?.member?.is_admin;
+  const unread = session?.member ? await getUnreadCount(session.member.id) : 0;
 
   return (
     <header>
@@ -30,6 +32,10 @@ export default async function Header() {
                   &nbsp;·&nbsp;
                 </>
               )}
+              <Link href="/notifications" className="bell" aria-label="Notifications">
+                &#9993;{unread > 0 && <span className="badge">{unread}</span>}
+              </Link>
+              &nbsp;·&nbsp;
               <Link href="/me">@{handle}</Link>
               &nbsp;·&nbsp;
               <form action="/auth/signout" method="post" style={{ display: "inline" }}>

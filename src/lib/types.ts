@@ -48,4 +48,14 @@ export type Page = {
   is_rules: boolean;
 };
 
+export type Notification = {
+  id: string;
+  kind: string;
+  body: string;
+  link_type: string | null;
+  link_id: string | null;
+  read: boolean;
+  created_at: string;
+};
+
 export type SearchResult<T> = { rows: T[]; total: number };

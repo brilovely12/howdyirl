@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { howdyDb } from "./supabase";
-import type { Group, EventRow, Update, Comment, Tag, Page, SearchResult } from "./types";
+import type { Group, EventRow, Update, Comment, Tag, Page, Notification, SearchResult } from "./types";
 
 export const PAGE_SIZE = 10;
 
@@ -197,4 +197,25 @@ export async function getPage(slug: string): Promise<Page | null> {
     .eq("status", "published")
     .maybeSingle();
   return (data as Page) ?? null;
+}
+
+export async function getUnreadCount(memberId: string): Promise<number> {
+  const db = howdyDb();
+  const { count } = await db
+    .from("notifications")
+    .select("id", { count: "exact", head: true })
+    .eq("member_id", memberId)
+    .eq("read", false);
+  return count ?? 0;
+}
+
+export async function getNotifications(memberId: string): Promise<Notification[]> {
+  const db = howdyDb();
+  const { data } = await db
+    .from("notifications")
+    .select("id,kind,body,link_type,link_id,read,created_at")
+    .eq("member_id", memberId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+  return (data ?? []) as Notification[];
 }
