@@ -16,32 +16,27 @@ export default async function GroupsPage({
 }) {
   const sp = await searchParams;
   const q = sp.q?.trim() || undefined;
-  const tag = sp.tag || undefined;
+  const activeTags = sp.tag ? sp.tag.split(",").filter(Boolean) : [];
   const page = Math.max(1, parseInt(sp.page ?? "1", 10) || 1);
 
   const [{ rows, total }, tags, session] = await Promise.all([
-    searchGroups({ q, tag, page }),
+    searchGroups({ q, tags: activeTags.length ? activeTags : undefined, page }),
     listTags(),
     getSessionUser(),
   ]);
   const postHref = session ? "/groups/new" : "/login";
-  const claimHref = session ? "#" : "/login";
 
   const emptyMsg = q
-    ? `no groups match “${q}”.`
-    : "no groups with that topic yet.";
+    ? `No groups match "${q}".`
+    : "No groups with that topic yet.";
 
   return (
     <div className="layout">
       <aside className="side">
         <h4>topics</h4>
-        <TagChips basePath="/groups" tags={tags} activeTag={tag} q={q} />
-        <a className="btn" href={postHref}>
-          + post a group
-        </a>
-        <div style={{ height: 8 }} />
-        <a className="btn ghost" href={claimHref}>
-          claim a group
+        <TagChips basePath="/groups" tags={tags} activeTags={activeTags} q={q} />
+        <a className="btn post" href={postHref}>
+          + Post a Group
         </a>
       </aside>
 
@@ -49,7 +44,7 @@ export default async function GroupsPage({
         <SearchBox placeholder="Search groups…" />
         <div className="listhead">
           <h2>local groups</h2>
-          <span className="sort">sort: recently updated ▾</span>
+          <span className="sort">Sort: Recently updated ▾</span>
         </div>
 
         {rows.length ? (
@@ -58,7 +53,7 @@ export default async function GroupsPage({
           <div className="empty">{emptyMsg}</div>
         )}
 
-        <Pager basePath="/groups" page={page} total={total} pageSize={PAGE_SIZE} q={q} tag={tag} />
+        <Pager basePath="/groups" page={page} total={total} pageSize={PAGE_SIZE} q={q} tag={sp.tag} />
       </section>
     </div>
   );

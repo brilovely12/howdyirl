@@ -69,7 +69,7 @@ export default function OnboardingForm({ taken }: { taken?: boolean }) {
           </div>
         )}
         <button className="btn" type="submit" disabled={busy} style={{ marginTop: 14, opacity: busy ? 0.6 : 1 }}>
-          {busy ? "…" : "continue"}
+          {busy ? "…" : "Continue"}
         </button>
       </form>
     </div>

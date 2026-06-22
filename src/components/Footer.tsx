@@ -5,16 +5,16 @@ export default function Footer() {
     <footer>
       <div className="wrap">
         <div className="sister">
-          a sister site to{" "}
+          A sister site to{" "}
           <a href="https://www.boopem.com" target="_blank" rel="noopener">
             <span className="hw">boopem</span>
           </a>{" "}
-          — meet people on howdy, keep in touch on boopem
+          — Meet people on Howdy, keep in touch on Boopem
         </div>
         <div className="footlinks">
-          <Link href="/p/rules">rules</Link> · <a href="#">how it works</a> ·{" "}
-          <a href="#">contact</a> · <Link href="/p/terms">terms</Link> ·{" "}
-          <Link href="/p/privacy">privacy</Link> · <a href="#">request your city</a>
+          <Link href="/p/rules">Rules</Link> · <a href="#">How it works</a> ·{" "}
+          <a href="#">Contact</a> · <Link href="/p/terms">Terms</Link> ·{" "}
+          <Link href="/p/privacy">Privacy</Link> · <a href="#">Request your city</a>
         </div>
         <div className="copyright">© 2026 Howdy IRL. All rights reserved.</div>
       </div>

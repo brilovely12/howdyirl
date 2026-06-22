@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-/** prev / next paging (no infinite scroll), preserving query + tag. */
 export default function Pager({
   basePath,
   page,
@@ -29,9 +28,11 @@ export default function Pager({
   return (
     <div className="pager">
       {page > 1 ? <Link href={href(page - 1)}>‹ prev</Link> : <span className="cur">‹ prev</span>}
-      <span className="cur">
-        page {page} of {pages}
-      </span>
+      {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
+        <Link key={p} href={href(p)} className={`pg${p === page ? " on" : ""}`}>
+          {p}
+        </Link>
+      ))}
       {page < pages ? <Link href={href(page + 1)}>next ›</Link> : <span className="cur">next ›</span>}
     </div>
   );

@@ -27,7 +27,7 @@ export default async function GroupDetail({ params }: { params: Promise<{ id: st
   return (
     <div>
       <Link className="back" href="/groups">
-        ‹ back to list
+        ‹ Back to list
       </Link>
       <div className="detail">
         <div className="detail-top">
@@ -40,7 +40,7 @@ export default async function GroupDetail({ params }: { params: Promise<{ id: st
               {group.claimed && <CheckBadge />}
             </h1>
             <div className="sub">
-              huntsville, al
+              Huntsville, AL
               {group.claimed && (
                 <>
                   {" · "}
@@ -49,9 +49,6 @@ export default async function GroupDetail({ params }: { params: Promise<{ id: st
               )}
             </div>
             <p>{group.description}</p>
-            <div className="meta">
-              added by <a href="#">@{group.creator_handle}</a>
-            </div>
             <div className="topics-row">
               {group.tags.map((t) => (
                 <span className="topic" key={t}>
@@ -61,7 +58,7 @@ export default async function GroupDetail({ params }: { params: Promise<{ id: st
             </div>
             {!group.claimed && (
               <p style={{ color: "var(--ink-faint)", fontSize: 12 }}>
-                ⚠ This listing was added by someone other than the organizer. Info may be out of
+                This listing was added by someone other than the organizer. Info may be out of
                 date. Are you the organizer? You can claim it.
               </p>
             )}
@@ -93,7 +90,7 @@ export default async function GroupDetail({ params }: { params: Promise<{ id: st
               </div>
             ))
           ) : (
-            <div className="meta">none scheduled</div>
+            <div className="meta">None scheduled</div>
           )}
         </div>
 
@@ -108,7 +105,7 @@ export default async function GroupDetail({ params }: { params: Promise<{ id: st
             ))
           ) : (
             <div className="meta">
-              no updates yet{group.claimed ? " — the organizer can post one." : "."}
+              No updates yet{group.claimed ? " — the organizer can post one." : "."}
             </div>
           )}
         </div>
@@ -116,15 +113,15 @@ export default async function GroupDetail({ params }: { params: Promise<{ id: st
         <div className="actions">
           {group.claimed ? (
             <a className="btn" href={loggedIn ? "#" : "/login"}>
-              join this group
+              Join this group
             </a>
           ) : (
             <a className="btn ghost" href={loggedIn ? "#" : "/login"}>
-              I run this — claim it
+              I run this — Claim it
             </a>
           )}
           <a className="report" href="#">
-            report this listing
+            Report this listing
           </a>
         </div>
 

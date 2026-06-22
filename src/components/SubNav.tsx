@@ -19,10 +19,10 @@ export default function SubNav({
     <div className="subnav">
       <div className="subnav-inner">
         <Link href="/groups" className={`tab${isGroups ? " active" : ""}`}>
-          groups <span className="ct">({counts.groups})</span>
+          Groups <span className="ct">({counts.groups})</span>
         </Link>
         <Link href="/events" className={`tab${isEvents ? " active" : ""}`}>
-          events <span className="ct">({counts.events})</span>
+          Events <span className="ct">({counts.events})</span>
         </Link>
         {navPages.map((p) => (
           <Link
@@ -30,7 +30,7 @@ export default function SubNav({
             href={`/p/${p.slug}`}
             className={`tab${pathname === `/p/${p.slug}` ? " active" : ""}`}
           >
-            {p.title.toLowerCase()}
+            {p.title}
           </Link>
         ))}
       </div>

@@ -25,7 +25,7 @@ export default async function EventDetail({ params }: { params: Promise<{ id: st
   return (
     <div>
       <Link className="back" href="/events">
-        ‹ back to list
+        ‹ Back to list
       </Link>
       <div className="detail">
         <div className="detail-top">
@@ -39,13 +39,13 @@ export default async function EventDetail({ params }: { params: Promise<{ id: st
               <b style={{ color: "var(--amber)", fontFamily: "var(--mono)" }}>
                 {eventDate(event.starts_at)} · {eventTime(event.starts_at)}
               </b>{" "}
-              · huntsville, al
+              · Huntsville, AL
             </div>
             <p>{event.description}</p>
             <div className="meta">
               {event.host_group_name ? (
                 <>
-                  hosted by{" "}
+                  Hosted by{" "}
                   {event.host_group_id ? (
                     <Link href={`/groups/${event.host_group_id}`}>{event.host_group_name}</Link>
                   ) : (
@@ -54,7 +54,7 @@ export default async function EventDetail({ params }: { params: Promise<{ id: st
                 </>
               ) : (
                 <>
-                  posted by <a href="#">@{event.creator_handle}</a>
+                  Posted by <a href="#">@{event.creator_handle}</a>
                 </>
               )}
             </div>
@@ -81,7 +81,7 @@ export default async function EventDetail({ params }: { params: Promise<{ id: st
             RSVP
           </a>
           <a className="report" href="#">
-            report this event
+            Report this event
           </a>
         </div>
 

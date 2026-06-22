@@ -45,7 +45,7 @@ export default function GroupForm({ tags }: { tags: Tag[] }) {
 
   return (
     <form className="form" onSubmit={submit}>
-      <h2>post a group</h2>
+      <h2>Post a Group</h2>
 
       <label>group name</label>
       <input value={name} required minLength={3} placeholder="e.g. Madison County Beekeepers" onChange={(e) => setName(e.target.value)} />

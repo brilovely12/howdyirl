@@ -60,7 +60,7 @@ export default function EventForm({
 
   return (
     <form className="form" onSubmit={submit}>
-      <h2>post an event</h2>
+      <h2>Post an Event</h2>
 
       <label>event name</label>
       <input value={name} required minLength={3} placeholder="e.g. Saturday Farmers Market Meetup" onChange={(e) => setName(e.target.value)} />

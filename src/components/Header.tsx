@@ -15,13 +15,10 @@ export default async function Header() {
           <span className="beta">BETA</span>
         </Link>
         <div className="city-pick">
-          city:{" "}
-          <select defaultValue="huntsville, al" aria-label="Choose city">
-            <option>huntsville, al</option>
-            <option disabled>— nearby (soon) —</option>
-            <option disabled>birmingham, al</option>
-            <option disabled>nashville, tn</option>
-            <option disabled>atlanta, ga</option>
+          City:{" "}
+          <select defaultValue="Huntsville, AL" aria-label="Choose city">
+            <option>Huntsville, AL</option>
+            <option disabled>More coming soon</option>
           </select>
         </div>
         <div className="auth">
@@ -47,13 +44,13 @@ export default async function Header() {
                     padding: 0,
                   }}
                 >
-                  log out
+                  Log out
                 </button>
               </form>
             </>
           ) : (
             <>
-              browsing as guest &nbsp;·&nbsp; <Link href="/login">log in</Link>
+              Browsing as guest &nbsp;·&nbsp; <Link href="/login">Log in</Link>
             </>
           )}
         </div>

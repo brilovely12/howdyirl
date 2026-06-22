@@ -40,13 +40,13 @@ const GROUP_COLS =
 const EVENT_COLS =
   "id,creator_handle,host_group_id,host_group_name,name,description,starts_at,external_link,tags,status";
 
-export type ListParams = { q?: string; tag?: string; page?: number };
+export type ListParams = { q?: string; tags?: string[]; page?: number };
 
 /**
  * Groups list with server-side search. Combines (AND) the text query with the
  * active tag filter, keeps the existing "recently updated" sort, and paginates.
  */
-export async function searchGroups({ q, tag, page = 1 }: ListParams): Promise<SearchResult<Group>> {
+export async function searchGroups({ q, tags, page = 1 }: ListParams): Promise<SearchResult<Group>> {
   const cityId = await getCityId();
   if (!cityId) return { rows: [], total: 0 };
 
@@ -57,7 +57,7 @@ export async function searchGroups({ q, tag, page = 1 }: ListParams): Promise<Se
     .eq("city_id", cityId)
     .eq("status", "live");
 
-  if (tag) query = query.contains("tags", [tag]);
+  if (tags?.length) query = query.contains("tags", tags);
   for (const term of queryTerms(q)) query = query.ilike("search_text", likePattern(term));
 
   const from = (page - 1) * PAGE_SIZE;
@@ -71,7 +71,7 @@ export async function searchGroups({ q, tag, page = 1 }: ListParams): Promise<Se
  * Events list with server-side search. Same combine/sort/paginate rules; events
  * also match on host group name and sort by soonest upcoming date.
  */
-export async function searchEvents({ q, tag, page = 1 }: ListParams): Promise<SearchResult<EventRow>> {
+export async function searchEvents({ q, tags, page = 1 }: ListParams): Promise<SearchResult<EventRow>> {
   const cityId = await getCityId();
   if (!cityId) return { rows: [], total: 0 };
 
@@ -83,7 +83,7 @@ export async function searchEvents({ q, tag, page = 1 }: ListParams): Promise<Se
     .eq("status", "live")
     .gte("starts_at", new Date().toISOString());
 
-  if (tag) query = query.contains("tags", [tag]);
+  if (tags?.length) query = query.contains("tags", tags);
   for (const term of queryTerms(q)) query = query.ilike("search_text", likePattern(term));
 
   const from = (page - 1) * PAGE_SIZE;

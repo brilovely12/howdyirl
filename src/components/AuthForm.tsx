@@ -95,14 +95,14 @@ export default function AuthForm() {
 
   return (
     <div className="form" style={{ maxWidth: 420 }}>
-      <h2>{mode === "login" ? "Log in to Howdy" : "Join Howdy IRL"}</h2>
+      <h2>{mode === "login" ? "Log In to Howdy" : "Join Howdy IRL"}</h2>
 
       <div
         style={{
           background: "var(--panel-2)",
           border: "1px solid var(--rule)",
           borderLeft: "3px solid var(--teal)",
-          borderRadius: 10,
+          borderRadius: 3,
           padding: "9px 12px",
           margin: "0 0 14px",
           fontSize: 12.5,
@@ -119,10 +119,10 @@ export default function AuthForm() {
 
       <div style={{ display: "flex", gap: 10, marginBottom: 6 }}>
         <button type="button" className={`btn ${mode === "login" ? "" : "ghost"}`} style={{ width: "auto" }} onClick={() => setMode("login")}>
-          log in
+          Log in
         </button>
         <button type="button" className={`btn ${mode === "signup" ? "" : "ghost"}`} style={{ width: "auto" }} onClick={() => setMode("signup")}>
-          sign up
+          Sign up
         </button>
       </div>
 
@@ -160,7 +160,7 @@ export default function AuthForm() {
         {notice && <div className="hint" style={{ color: "var(--teal)", marginTop: 10 }}>{notice}</div>}
 
         <button className="btn" type="submit" disabled={busy} style={{ marginTop: 14, opacity: busy ? 0.6 : 1 }}>
-          {busy ? "…" : mode === "login" ? "log in" : "create account"}
+          {busy ? "…" : mode === "login" ? "Log in" : "Create account"}
         </button>
       </form>
 
@@ -171,10 +171,10 @@ export default function AuthForm() {
       </div>
 
       <button type="button" className="btn ghost" onClick={() => oauth("google")} style={{ marginBottom: 8 }}>
-        continue with Google
+        Continue with Google
       </button>
       <button type="button" className="btn ghost" onClick={() => oauth("apple")}>
-        continue with Apple
+        Continue with Apple
       </button>
 
       <div className="hint" style={{ marginTop: 14 }}>

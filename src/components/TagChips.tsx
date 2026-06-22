@@ -1,39 +1,45 @@
 import Link from "next/link";
 import type { Tag } from "@/lib/types";
 
-/**
- * Topic filter chips. Each chip is a link that toggles the `tag` param while
- * preserving the current search query; selecting a chip resets paging.
- */
 export default function TagChips({
   basePath,
   tags,
-  activeTag,
+  activeTags,
   q,
 }: {
   basePath: string;
   tags: Tag[];
-  activeTag?: string;
+  activeTags: string[];
   q?: string;
 }) {
-  const href = (tag?: string) => {
+  const href = (toggle: string) => {
+    const next = activeTags.includes(toggle)
+      ? activeTags.filter((t) => t !== toggle)
+      : [...activeTags, toggle];
     const params = new URLSearchParams();
     if (q) params.set("q", q);
-    if (tag) params.set("tag", tag);
+    if (next.length) params.set("tag", next.join(","));
+    const qs = params.toString();
+    return qs ? `${basePath}?${qs}` : basePath;
+  };
+
+  const clearHref = () => {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
     const qs = params.toString();
     return qs ? `${basePath}?${qs}` : basePath;
   };
 
   return (
     <div>
-      <Link href={href()} className={`chip${!activeTag ? " on" : ""}`}>
-        all
+      <Link href={clearHref()} className={`chip${!activeTags.length ? " on" : ""}`}>
+        All
       </Link>
       {tags.map((t) => (
         <Link
           key={t.id}
-          href={href(activeTag === t.name ? undefined : t.name)}
-          className={`chip${activeTag === t.name ? " on" : ""}`}
+          href={href(t.name)}
+          className={`chip${activeTags.includes(t.name) ? " on" : ""}`}
         >
           {t.name}
         </Link>

@@ -14,7 +14,7 @@ export default function EventRow({ event, index }: { event: EventRowType; index:
         <div className="meta">
           {event.host_group_name && (
             <>
-              hosted by {event.host_group_name}
+              Hosted by {event.host_group_name}
               <span className="dot">·</span>
             </>
           )}

@@ -28,7 +28,7 @@ export default function Comments({ comments, loggedIn }: { comments: Comment[]; 
           </div>
         ))
       ) : (
-        <div className="meta">no comments yet</div>
+        <div className="meta">No comments yet</div>
       )}
       <div className="meta" style={{ marginTop: 10 }}>
         {loggedIn ? (
