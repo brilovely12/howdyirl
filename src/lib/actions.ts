@@ -106,6 +106,16 @@ export async function resolveReport(reportId: string, status: "resolved" | "dism
   revalidatePath("/admin");
 }
 
+export async function resolveReportAndHide(reportId: string, targetType: string, targetId: string) {
+  await requireAdmin();
+  const supabase = await getServerClient();
+  await supabase.from("reports").update({ status: "resolved" }).eq("id", reportId);
+  const table = targetType === "group" ? "groups" : "events";
+  await supabase.from(table).update({ status: "hidden" }).eq("id", targetId);
+  revalidatePath("/admin");
+  revalidatePath(`/${targetType}s/${targetId}`);
+}
+
 export async function decideClaim(claimId: string, groupId: string, approve: boolean) {
   await requireAdmin();
   const supabase = await getServerClient();
@@ -118,4 +128,100 @@ export async function decideClaim(claimId: string, groupId: string, approve: boo
   }
   revalidatePath("/admin");
   revalidatePath(`/groups/${groupId}`);
+}
+
+// --- Content moderation ---
+
+export async function setContentStatus(type: "group" | "event", id: string, status: "live" | "hidden" | "removed") {
+  await requireAdmin();
+  const supabase = await getServerClient();
+  const table = type === "group" ? "groups" : "events";
+  await supabase.from(table).update({ status }).eq("id", id);
+  revalidatePath("/admin");
+  revalidatePath(`/${type}s/${id}`);
+  revalidatePath(`/${type}s`);
+}
+
+export async function deleteComment(commentId: string) {
+  await requireAdmin();
+  const supabase = await getServerClient();
+  await supabase.from("comments").delete().eq("id", commentId);
+  revalidatePath("/admin");
+}
+
+// --- Member management ---
+
+export async function toggleBan(memberId: string, banned: boolean) {
+  await requireAdmin();
+  const supabase = await getServerClient();
+  await supabase.from("members").update({ banned }).eq("id", memberId);
+  revalidatePath("/admin");
+}
+
+export async function toggleAdmin(memberId: string, isAdmin: boolean) {
+  await requireAdmin();
+  const supabase = await getServerClient();
+  await supabase.from("members").update({ is_admin: isAdmin }).eq("id", memberId);
+  revalidatePath("/admin");
+}
+
+// --- Pages CMS ---
+
+export async function savePage(id: string | null, title: string, slug: string, body: string, inNav: boolean) {
+  await requireAdmin();
+  const supabase = await getServerClient();
+  if (id) {
+    await supabase.from("pages").update({ title, slug, body, in_nav: inNav, updated_at: new Date().toISOString() }).eq("id", id);
+  } else {
+    await supabase.from("pages").insert({ title, slug, body, in_nav: inNav });
+  }
+  revalidatePath("/admin");
+  revalidatePath(`/p/${slug}`);
+}
+
+export async function deletePage(pageId: string) {
+  await requireAdmin();
+  const supabase = await getServerClient();
+  await supabase.from("pages").delete().eq("id", pageId);
+  revalidatePath("/admin");
+}
+
+// --- Tags ---
+
+export async function saveTag(id: string | null, name: string, sort: number) {
+  await requireAdmin();
+  const supabase = await getServerClient();
+  if (id) {
+    await supabase.from("tags").update({ name, sort }).eq("id", id);
+  } else {
+    await supabase.from("tags").insert({ name, sort });
+  }
+  revalidatePath("/admin");
+  revalidatePath("/groups");
+  revalidatePath("/events");
+}
+
+export async function deleteTag(tagId: string) {
+  await requireAdmin();
+  const supabase = await getServerClient();
+  await supabase.from("tags").delete().eq("id", tagId);
+  revalidatePath("/admin");
+  revalidatePath("/groups");
+  revalidatePath("/events");
+}
+
+// --- Broadcast notification ---
+
+export async function broadcastNotification(body: string) {
+  await requireAdmin();
+  const supabase = await getServerClient();
+  const { data: members } = await supabase.from("members").select("id");
+  if (!members?.length) return;
+  const rows = members.map((m: any) => ({
+    member_id: m.id,
+    kind: "broadcast",
+    body: body.trim(),
+  }));
+  await supabase.from("notifications").insert(rows);
+  revalidatePath("/admin");
 }
