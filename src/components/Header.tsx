@@ -33,7 +33,7 @@ export default async function Header() {
                 </>
               )}
               <Link href="/notifications" className="bell" aria-label="Notifications">
-                &#9993;{unread > 0 && <span className="badge">{unread}</span>}
+                🔔{unread > 0 && <span className="badge">{unread}</span>}
               </Link>
               &nbsp;·&nbsp;
               <Link href="/me">@{handle}</Link>
