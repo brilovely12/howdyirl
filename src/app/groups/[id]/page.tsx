@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getGroup, getGroupUpdates, getGroupEvents, getComments, isMemberOfGroup } from "@/lib/data";
@@ -11,6 +12,16 @@ import ClaimForm from "@/components/ClaimForm";
 import ReportButton from "@/components/ReportButton";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const group = await getGroup((await params).id);
+  if (!group) return {};
+  return {
+    title: `${group.name} — Howdy IRL`,
+    description: group.description,
+    openGraph: { title: group.name, description: group.description },
+  };
+}
 
 export default async function GroupDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -77,13 +88,6 @@ export default async function GroupDetail({ params }: { params: Promise<{ id: st
           </div>
         </div>
 
-        <div className="gallery">
-          <div>logo</div>
-          <div>photo 1</div>
-          <div>photo 2</div>
-          <div>+ add</div>
-        </div>
-
         <div className="upcoming">
           <h4>upcoming events from this group</h4>
           {events.length ? (
@@ -119,19 +123,19 @@ export default async function GroupDetail({ params }: { params: Promise<{ id: st
             loggedIn ? (
               <JoinButton groupId={group.id} joined={joined} />
             ) : (
-              <Link className="btn" href="/login">Join this group</Link>
+              <Link className="btn" href={`/login?next=/groups/${group.id}`}>Join this group</Link>
             )
           ) : (
             loggedIn ? (
               <ClaimForm groupId={group.id} />
             ) : (
-              <Link className="btn ghost" href="/login">I run this — Claim it</Link>
+              <Link className="btn ghost" href={`/login?next=/groups/${group.id}`}>I run this — Claim it</Link>
             )
           )}
           {loggedIn ? (
             <ReportButton targetType="group" targetId={group.id} />
           ) : (
-            <Link className="report" href="/login">Report this listing</Link>
+            <Link className="report" href={`/login?next=/groups/${group.id}`}>Report this listing</Link>
           )}
         </div>
 

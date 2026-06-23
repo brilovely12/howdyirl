@@ -10,6 +10,12 @@ async function requireMember() {
   return session.member;
 }
 
+async function requireAdmin() {
+  const member = await requireMember();
+  if (!member.is_admin) throw new Error("Not authorized");
+  return member;
+}
+
 export async function joinGroup(groupId: string) {
   const member = await requireMember();
   const supabase = await getServerClient();
@@ -91,4 +97,25 @@ export async function submitClaim(groupId: string, contactEmail: string, note: s
     contact_email: contactEmail.trim(),
     note: note.trim() || null,
   });
+}
+
+export async function resolveReport(reportId: string, status: "resolved" | "dismissed") {
+  await requireAdmin();
+  const supabase = await getServerClient();
+  await supabase.from("reports").update({ status }).eq("id", reportId);
+  revalidatePath("/admin");
+}
+
+export async function decideClaim(claimId: string, groupId: string, approve: boolean) {
+  await requireAdmin();
+  const supabase = await getServerClient();
+  await supabase
+    .from("claim_requests")
+    .update({ status: approve ? "approved" : "rejected" })
+    .eq("id", claimId);
+  if (approve) {
+    await supabase.from("groups").update({ claimed: true }).eq("id", groupId);
+  }
+  revalidatePath("/admin");
+  revalidatePath(`/groups/${groupId}`);
 }

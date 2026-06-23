@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getEvent, getEventUpdates, getComments, hasRsvp } from "@/lib/data";
@@ -9,6 +10,16 @@ import RsvpButton from "@/components/RsvpButton";
 import ReportButton from "@/components/ReportButton";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const event = await getEvent((await params).id);
+  if (!event) return {};
+  return {
+    title: `${event.name} — Howdy IRL`,
+    description: event.description,
+    openGraph: { title: event.name, description: event.description },
+  };
+}
 
 export default async function EventDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -83,12 +94,12 @@ export default async function EventDetail({ params }: { params: Promise<{ id: st
           {loggedIn ? (
             <RsvpButton eventId={event.id} rsvped={rsvped} />
           ) : (
-            <Link className="btn" href="/login">RSVP</Link>
+            <Link className="btn" href={`/login?next=/events/${event.id}`}>RSVP</Link>
           )}
           {loggedIn ? (
             <ReportButton targetType="event" targetId={event.id} />
           ) : (
-            <Link className="report" href="/login">Report this event</Link>
+            <Link className="report" href={`/login?next=/events/${event.id}`}>Report this event</Link>
           )}
         </div>
 

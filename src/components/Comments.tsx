@@ -23,7 +23,7 @@ export default function Comments({
         comments.map((c) => (
           <div className="cmt" key={c.id}>
             <div className="cmt-head">
-              <a href="#">@{c.author_handle}</a>
+              <span style={{ color: "var(--link)" }}>@{c.author_handle}</span>
               {ADMIN_HANDLES.includes(c.author_handle) && <span className="adminflag">admin</span>}
               <span className="cmt-when">
                 {stamp(c.created_at)}

@@ -6,7 +6,7 @@ import { normalizeHandle, handleError } from "@/lib/handle";
 
 type Mode = "login" | "signup";
 
-export default function AuthForm() {
+export default function AuthForm({ next = "/groups" }: { next?: string }) {
   const supabase = getBrowserClient();
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
@@ -40,7 +40,7 @@ export default function AuthForm() {
       window.location.assign("/onboarding");
       return;
     }
-    window.location.assign("/groups");
+    window.location.assign(next);
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -88,7 +88,7 @@ export default function AuthForm() {
 
   async function oauth(provider: "google" | "apple") {
     setError(null);
-    const redirectTo = `${window.location.origin}/auth/callback?next=/groups`;
+    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
     const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo } });
     if (error) setError(error.message);
   }

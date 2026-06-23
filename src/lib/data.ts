@@ -40,7 +40,7 @@ const GROUP_COLS =
 const EVENT_COLS =
   "id,creator_handle,host_group_id,host_group_name,name,description,starts_at,external_link,tags,status";
 
-export type ListParams = { q?: string; tags?: string[]; page?: number };
+export type ListParams = { q?: string; tags?: string[]; page?: number; when?: string };
 
 /**
  * Groups list with server-side search. Combines (AND) the text query with the
@@ -71,7 +71,31 @@ export async function searchGroups({ q, tags, page = 1 }: ListParams): Promise<S
  * Events list with server-side search. Same combine/sort/paginate rules; events
  * also match on host group name and sort by soonest upcoming date.
  */
-export async function searchEvents({ q, tags, page = 1 }: ListParams): Promise<SearchResult<EventRow>> {
+function whenEnd(when: string | undefined): string | null {
+  if (!when) return null;
+  const now = new Date();
+  const d = new Date(now);
+  if (when === "week") {
+    d.setDate(d.getDate() + (7 - d.getDay()));
+    d.setHours(23, 59, 59, 999);
+    return d.toISOString();
+  }
+  if (when === "weekend") {
+    const day = d.getDay();
+    const sat = day <= 6 ? 6 - day : 0;
+    d.setDate(d.getDate() + sat + 1);
+    d.setHours(23, 59, 59, 999);
+    return d.toISOString();
+  }
+  if (when === "month") {
+    d.setMonth(d.getMonth() + 1, 0);
+    d.setHours(23, 59, 59, 999);
+    return d.toISOString();
+  }
+  return null;
+}
+
+export async function searchEvents({ q, tags, when, page = 1 }: ListParams): Promise<SearchResult<EventRow>> {
   const cityId = await getCityId();
   if (!cityId) return { rows: [], total: 0 };
 
@@ -82,6 +106,9 @@ export async function searchEvents({ q, tags, page = 1 }: ListParams): Promise<S
     .eq("city_id", cityId)
     .eq("status", "live")
     .gte("starts_at", new Date().toISOString());
+
+  const end = whenEnd(when);
+  if (end) query = query.lte("starts_at", end);
 
   if (tags?.length) query = query.contains("tags", tags);
   for (const term of queryTerms(q)) query = query.ilike("search_text", likePattern(term));

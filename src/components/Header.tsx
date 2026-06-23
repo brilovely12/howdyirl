@@ -28,7 +28,7 @@ export default async function Header() {
             <>
               {isAdmin && (
                 <>
-                  <b style={{ color: "var(--red)" }}>admin</b>
+                  <Link href="/admin" style={{ color: "var(--red)", fontWeight: 700, textDecoration: "none" }}>admin</Link>
                   &nbsp;·&nbsp;
                 </>
               )}

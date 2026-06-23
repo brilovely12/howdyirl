@@ -12,9 +12,10 @@ export default function Footer() {
           — Meet people on Howdy, keep in touch on Boopem
         </div>
         <div className="footlinks">
-          <Link href="/p/rules">Rules</Link> · <a href="#">How it works</a> ·{" "}
-          <a href="#">Contact</a> · <Link href="/p/terms">Terms</Link> ·{" "}
-          <Link href="/p/privacy">Privacy</Link> · <a href="#">Request your city</a>
+          <Link href="/p/rules">Rules</Link> · <Link href="/p/how-it-works">How it works</Link> ·{" "}
+          <Link href="/p/contact">Contact</Link> · <Link href="/p/terms">Terms</Link> ·{" "}
+          <Link href="/p/privacy">Privacy</Link> ·{" "}
+          <a href="mailto:hello@howdyirl.com?subject=Request%20a%20new%20city">Request your city</a>
         </div>
         <div className="copyright">© 2026 Howdy IRL. All rights reserved.</div>
       </div>

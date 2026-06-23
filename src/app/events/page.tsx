@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { searchEvents, listTags, PAGE_SIZE } from "@/lib/data";
 import { getSessionUser } from "@/lib/auth";
 import SearchBox from "@/components/SearchBox";
@@ -7,7 +8,14 @@ import Pager from "@/components/Pager";
 
 export const dynamic = "force-dynamic";
 
-type SP = { q?: string; tag?: string; page?: string };
+type SP = { q?: string; tag?: string; page?: string; when?: string };
+
+const WHEN_OPTIONS = [
+  { value: "", label: "All upcoming" },
+  { value: "week", label: "This week" },
+  { value: "weekend", label: "This weekend" },
+  { value: "month", label: "This month" },
+] as const;
 
 export default async function EventsPage({
   searchParams,
@@ -17,10 +25,11 @@ export default async function EventsPage({
   const sp = await searchParams;
   const q = sp.q?.trim() || undefined;
   const activeTags = sp.tag ? sp.tag.split(",").filter(Boolean) : [];
+  const when = sp.when || undefined;
   const page = Math.max(1, parseInt(sp.page ?? "1", 10) || 1);
 
   const [{ rows, total }, tags, session] = await Promise.all([
-    searchEvents({ q, tags: activeTags.length ? activeTags : undefined, page }),
+    searchEvents({ q, tags: activeTags.length ? activeTags : undefined, when, page }),
     listTags(),
     getSessionUser(),
   ]);
@@ -30,15 +39,27 @@ export default async function EventsPage({
     ? `No events match "${q}".`
     : "No events with that topic yet.";
 
+  const whenHref = (w: string) => {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    if (sp.tag) params.set("tag", sp.tag);
+    if (w) params.set("when", w);
+    const qs = params.toString();
+    return qs ? `/events?${qs}` : "/events";
+  };
+
   return (
     <div className="layout">
       <aside className="side">
         <h4>when</h4>
         <ul>
-          <li><a href="#" className="on">All upcoming</a></li>
-          <li><a href="#">This week</a></li>
-          <li><a href="#">This weekend</a></li>
-          <li><a href="#">This month</a></li>
+          {WHEN_OPTIONS.map((o) => (
+            <li key={o.value}>
+              <Link href={whenHref(o.value)} className={(when ?? "") === o.value ? "on" : ""}>
+                {o.label}
+              </Link>
+            </li>
+          ))}
         </ul>
         <h4>topics</h4>
         <TagChips basePath="/events" tags={tags} activeTags={activeTags} q={q} />
