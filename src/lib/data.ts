@@ -199,6 +199,48 @@ export async function getPage(slug: string): Promise<Page | null> {
   return (data as Page) ?? null;
 }
 
+export async function isMemberOfGroup(memberId: string, groupId: string): Promise<boolean> {
+  const db = howdyDb();
+  const { data } = await db
+    .from("memberships")
+    .select("member_id")
+    .eq("member_id", memberId)
+    .eq("group_id", groupId)
+    .maybeSingle();
+  return !!data;
+}
+
+export async function hasRsvp(memberId: string, eventId: string): Promise<boolean> {
+  const db = howdyDb();
+  const { data } = await db
+    .from("rsvps")
+    .select("member_id")
+    .eq("member_id", memberId)
+    .eq("event_id", eventId)
+    .maybeSingle();
+  return !!data;
+}
+
+export async function getMyGroups(memberId: string): Promise<{ id: string; name: string }[]> {
+  const db = howdyDb();
+  const { data } = await db
+    .from("memberships")
+    .select("group_id, groups:group_id(id, name)")
+    .eq("member_id", memberId)
+    .order("created_at", { ascending: false });
+  return (data ?? []).map((r: any) => r.groups).filter(Boolean);
+}
+
+export async function getMyRsvps(memberId: string): Promise<{ id: string; name: string; starts_at: string }[]> {
+  const db = howdyDb();
+  const { data } = await db
+    .from("rsvps")
+    .select("event_id, events:event_id(id, name, starts_at)")
+    .eq("member_id", memberId)
+    .order("created_at", { ascending: false });
+  return (data ?? []).map((r: any) => r.events).filter(Boolean);
+}
+
 export async function getUnreadCount(memberId: string): Promise<number> {
   const db = howdyDb();
   const { count } = await db

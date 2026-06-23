@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getGroup, getGroupUpdates, getGroupEvents, getComments } from "@/lib/data";
+import { getGroup, getGroupUpdates, getGroupEvents, getComments, isMemberOfGroup } from "@/lib/data";
 import { getSessionUser } from "@/lib/auth";
 import { color, initials, eventDate, eventTime, stamp } from "@/lib/format";
 import { externalHref } from "@/lib/url";
 import CheckBadge from "@/components/CheckBadge";
 import Comments from "@/components/Comments";
+import JoinButton from "@/components/JoinButton";
+import ClaimForm from "@/components/ClaimForm";
+import ReportButton from "@/components/ReportButton";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +24,7 @@ export default async function GroupDetail({ params }: { params: Promise<{ id: st
     getSessionUser(),
   ]);
   const loggedIn = !!session;
+  const joined = session?.member ? await isMemberOfGroup(session.member.id, group.id) : false;
 
   const link = externalHref(group.external_link);
 
@@ -112,20 +116,26 @@ export default async function GroupDetail({ params }: { params: Promise<{ id: st
 
         <div className="actions">
           {group.claimed ? (
-            <a className="btn" href={loggedIn ? "#" : "/login"}>
-              Join this group
-            </a>
+            loggedIn ? (
+              <JoinButton groupId={group.id} joined={joined} />
+            ) : (
+              <Link className="btn" href="/login">Join this group</Link>
+            )
           ) : (
-            <a className="btn ghost" href={loggedIn ? "#" : "/login"}>
-              I run this — Claim it
-            </a>
+            loggedIn ? (
+              <ClaimForm groupId={group.id} />
+            ) : (
+              <Link className="btn ghost" href="/login">I run this — Claim it</Link>
+            )
           )}
-          <a className="report" href="#">
-            Report this listing
-          </a>
+          {loggedIn ? (
+            <ReportButton targetType="group" targetId={group.id} />
+          ) : (
+            <Link className="report" href="/login">Report this listing</Link>
+          )}
         </div>
 
-        <Comments comments={comments} loggedIn={loggedIn} />
+        <Comments comments={comments} loggedIn={loggedIn} targetType="group" targetId={group.id} />
       </div>
     </div>
   );

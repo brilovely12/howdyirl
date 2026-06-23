@@ -1,10 +1,21 @@
 import Link from "next/link";
 import type { Comment } from "@/lib/types";
 import { stamp } from "@/lib/format";
+import CommentForm from "./CommentForm";
 
 const ADMIN_HANDLES = ["brilovely"];
 
-export default function Comments({ comments, loggedIn }: { comments: Comment[]; loggedIn: boolean }) {
+export default function Comments({
+  comments,
+  loggedIn,
+  targetType,
+  targetId,
+}: {
+  comments: Comment[];
+  loggedIn: boolean;
+  targetType: "group" | "event";
+  targetId: string;
+}) {
   return (
     <div className="upcoming">
       <h4>comments</h4>
@@ -30,15 +41,13 @@ export default function Comments({ comments, loggedIn }: { comments: Comment[]; 
       ) : (
         <div className="meta">No comments yet</div>
       )}
-      <div className="meta" style={{ marginTop: 10 }}>
-        {loggedIn ? (
-          "Commenting is coming soon."
-        ) : (
-          <>
-            <Link href="/login">Log in</Link> to comment.
-          </>
-        )}
-      </div>
+      {loggedIn ? (
+        <CommentForm targetType={targetType} targetId={targetId} />
+      ) : (
+        <div className="meta" style={{ marginTop: 10 }}>
+          <Link href="/login">Log in</Link> to comment.
+        </div>
+      )}
     </div>
   );
 }

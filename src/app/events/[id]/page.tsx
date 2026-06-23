@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getEvent, getEventUpdates, getComments } from "@/lib/data";
+import { getEvent, getEventUpdates, getComments, hasRsvp } from "@/lib/data";
 import { getSessionUser } from "@/lib/auth";
 import { color, initials, eventDate, eventTime, stamp } from "@/lib/format";
 import { externalHref } from "@/lib/url";
 import Comments from "@/components/Comments";
+import RsvpButton from "@/components/RsvpButton";
+import ReportButton from "@/components/ReportButton";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +21,7 @@ export default async function EventDetail({ params }: { params: Promise<{ id: st
     getSessionUser(),
   ]);
   const loggedIn = !!session;
+  const rsvped = session?.member ? await hasRsvp(session.member.id, event.id) : false;
 
   const link = externalHref(event.external_link);
 
@@ -54,7 +57,7 @@ export default async function EventDetail({ params }: { params: Promise<{ id: st
                 </>
               ) : (
                 <>
-                  Posted by <a href="#">@{event.creator_handle}</a>
+                  Posted by @{event.creator_handle}
                 </>
               )}
             </div>
@@ -77,12 +80,16 @@ export default async function EventDetail({ params }: { params: Promise<{ id: st
         </div>
 
         <div className="actions">
-          <a className="btn" href={loggedIn ? "#" : "/login"}>
-            RSVP
-          </a>
-          <a className="report" href="#">
-            Report this event
-          </a>
+          {loggedIn ? (
+            <RsvpButton eventId={event.id} rsvped={rsvped} />
+          ) : (
+            <Link className="btn" href="/login">RSVP</Link>
+          )}
+          {loggedIn ? (
+            <ReportButton targetType="event" targetId={event.id} />
+          ) : (
+            <Link className="report" href="/login">Report this event</Link>
+          )}
         </div>
 
         {updates.length > 0 && (
@@ -97,7 +104,7 @@ export default async function EventDetail({ params }: { params: Promise<{ id: st
           </div>
         )}
 
-        <Comments comments={comments} loggedIn={loggedIn} />
+        <Comments comments={comments} loggedIn={loggedIn} targetType="event" targetId={event.id} />
       </div>
     </div>
   );
