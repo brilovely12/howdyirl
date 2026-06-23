@@ -41,7 +41,8 @@ header{border-bottom:1px solid var(--rule);background:var(--panel)}
 .topbar{display:flex;align-items:baseline;justify-content:space-between;padding:14px 16px;flex-wrap:wrap;gap:8px;max-width:1000px;margin:0 auto}
 .brand{font-family:var(--sans);font-weight:700;letter-spacing:-0.5px;display:flex;align-items:baseline;gap:5px;cursor:pointer;text-decoration:none}
 .brand:hover{text-decoration:none}
-.brand .hw{font-size:30px;background:linear-gradient(90deg,#b6a4f5 0%,#d9a8f0 25%,#f4a8d8 48%,#9fe8c4 78%,#f5e6a8 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+.brand .hw{font-size:30px;background:linear-gradient(90deg,#b6a4f5 0%,#d9a8f0 15%,#f4a8d8 30%,#9fe8c4 50%,#f5e6a8 65%,#b6a4f5 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:hw-shift 4s linear infinite}
+@keyframes hw-shift{0%{background-position:0% 0}100%{background-position:-200% 0}}
 .brand .irl{color:var(--ink);font-weight:700;font-size:18px}
 .beta{font-size:10px;font-weight:600;color:var(--ink-dim);border:1px solid var(--rule);border-radius:3px;padding:2px 6px;align-self:center;text-transform:uppercase;letter-spacing:.5px}
 .city-pick{font-family:var(--sans);font-size:12px;color:var(--ink-dim)}
@@ -182,7 +183,7 @@ footer a{color:var(--ink-dim)}
 footer .sister{padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid var(--rule);font-size:12px;color:var(--ink-faint)}
 footer .footlinks{font-size:11px;color:var(--ink-faint)}
 footer .copyright{margin-top:8px;font-size:11px;color:var(--ink-faint)}
-footer .sister .hw{font-size:14px;font-weight:700;background:linear-gradient(90deg,#b6a4f5 0%,#d9a8f0 25%,#f4a8d8 48%,#9fe8c4 78%,#f5e6a8 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+footer .sister .hw{font-size:14px;font-weight:700;background:linear-gradient(90deg,#b6a4f5 0%,#d9a8f0 15%,#f4a8d8 30%,#9fe8c4 50%,#f5e6a8 65%,#b6a4f5 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:hw-shift 4s linear infinite}
 footer .sister a{text-decoration:none}
 footer .sister a:hover{text-decoration:underline}
 
