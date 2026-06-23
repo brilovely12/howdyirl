@@ -8,6 +8,7 @@ import { externalHref } from "@/lib/url";
 import Comments from "@/components/Comments";
 import RsvpButton from "@/components/RsvpButton";
 import ReportButton from "@/components/ReportButton";
+import AdminBar from "@/components/AdminBar";
 
 export const dynamic = "force-dynamic";
 
@@ -23,16 +24,18 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function EventDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const event = await getEvent(id);
+  const session = await getSessionUser();
+  const isAdmin = !!session?.member?.is_admin;
+  const event = await getEvent(id, isAdmin);
   if (!event) notFound();
 
-  const [updates, comments, session] = await Promise.all([
+  const [updates, comments] = await Promise.all([
     getEventUpdates(event.id),
     getComments("event", event.id),
-    getSessionUser(),
   ]);
   const loggedIn = !!session;
   const rsvped = session?.member ? await hasRsvp(session.member.id, event.id) : false;
+  const canEdit = isAdmin || (session?.member?.id === event.creator_id);
 
   const link = externalHref(event.external_link);
 
@@ -41,13 +44,26 @@ export default async function EventDetail({ params }: { params: Promise<{ id: st
       <Link className="back" href="/events">
         ‹ Back to list
       </Link>
+
+      {isAdmin && <AdminBar type="event" id={event.id} status={event.status} />}
+
       <div className="detail">
         <div className="detail-top">
           <div className="hero" style={{ background: color(initials(event.name).length + event.name.length + 3) }}>
             {initials(event.name)}
           </div>
           <div style={{ flex: 1, minWidth: 240 }}>
-            <h1>{event.name}</h1>
+            <h1>
+              {event.name}
+              {canEdit && (
+                <Link
+                  href={`/events/${event.id}/edit`}
+                  style={{ fontSize: 12, fontWeight: 400, marginLeft: 10, color: "var(--link)" }}
+                >
+                  edit
+                </Link>
+              )}
+            </h1>
             <div className="sub">
               <span className="tag evt">event</span> ·{" "}
               <b style={{ color: "var(--amber)", fontFamily: "var(--mono)" }}>

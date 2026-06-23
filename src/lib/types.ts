@@ -1,5 +1,6 @@
 export type Group = {
   id: string;
+  creator_id: string | null;
   creator_handle: string | null;
   name: string;
   description: string;
@@ -14,6 +15,7 @@ export type Group = {
 
 export type EventRow = {
   id: string;
+  creator_id: string | null;
   creator_handle: string | null;
   host_group_id: string | null;
   host_group_name: string | null;

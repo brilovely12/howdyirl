@@ -36,9 +36,9 @@ export const listTags = cache(async (): Promise<Tag[]> => {
 });
 
 const GROUP_COLS =
-  "id,creator_handle,name,description,claimed,joins_count,external_link,link_label,tags,status,updated_at";
+  "id,creator_id,creator_handle,name,description,claimed,joins_count,external_link,link_label,tags,status,updated_at";
 const EVENT_COLS =
-  "id,creator_handle,host_group_id,host_group_name,name,description,starts_at,external_link,tags,status";
+  "id,creator_id,creator_handle,host_group_id,host_group_name,name,description,starts_at,external_link,tags,status";
 
 export type ListParams = { q?: string; tags?: string[]; page?: number; when?: string };
 
@@ -137,15 +137,19 @@ export const listCounts = cache(async (): Promise<{ groups: number; events: numb
   return { groups: g.count ?? 0, events: e.count ?? 0 };
 });
 
-export async function getGroup(id: string): Promise<Group | null> {
+export async function getGroup(id: string, anyStatus = false): Promise<Group | null> {
   const db = howdyDb();
-  const { data } = await db.from("groups").select(GROUP_COLS).eq("id", id).eq("status", "live").maybeSingle();
+  let query = db.from("groups").select(GROUP_COLS).eq("id", id);
+  if (!anyStatus) query = query.eq("status", "live");
+  const { data } = await query.maybeSingle();
   return (data as Group) ?? null;
 }
 
-export async function getEvent(id: string): Promise<EventRow | null> {
+export async function getEvent(id: string, anyStatus = false): Promise<EventRow | null> {
   const db = howdyDb();
-  const { data } = await db.from("events").select(EVENT_COLS).eq("id", id).eq("status", "live").maybeSingle();
+  let query = db.from("events").select(EVENT_COLS).eq("id", id);
+  if (!anyStatus) query = query.eq("status", "live");
+  const { data } = await query.maybeSingle();
   return (data as EventRow) ?? null;
 }
 

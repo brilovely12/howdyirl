@@ -10,6 +10,7 @@ import Comments from "@/components/Comments";
 import JoinButton from "@/components/JoinButton";
 import ClaimForm from "@/components/ClaimForm";
 import ReportButton from "@/components/ReportButton";
+import AdminBar from "@/components/AdminBar";
 
 export const dynamic = "force-dynamic";
 
@@ -25,17 +26,19 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function GroupDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const group = await getGroup(id);
+  const session = await getSessionUser();
+  const isAdmin = !!session?.member?.is_admin;
+  const group = await getGroup(id, isAdmin);
   if (!group) notFound();
 
-  const [updates, events, comments, session] = await Promise.all([
+  const [updates, events, comments] = await Promise.all([
     getGroupUpdates(group.id),
     getGroupEvents(group.id),
     getComments("group", group.id),
-    getSessionUser(),
   ]);
   const loggedIn = !!session;
   const joined = session?.member ? await isMemberOfGroup(session.member.id, group.id) : false;
+  const canEdit = isAdmin || (session?.member?.id === group.creator_id);
 
   const link = externalHref(group.external_link);
 
@@ -44,6 +47,9 @@ export default async function GroupDetail({ params }: { params: Promise<{ id: st
       <Link className="back" href="/groups">
         ‹ Back to list
       </Link>
+
+      {isAdmin && <AdminBar type="group" id={group.id} status={group.status} />}
+
       <div className="detail">
         <div className="detail-top">
           <div className="hero" style={{ background: color(initials(group.name).length + group.name.length) }}>
@@ -53,6 +59,14 @@ export default async function GroupDetail({ params }: { params: Promise<{ id: st
             <h1>
               {group.name}
               {group.claimed && <CheckBadge />}
+              {canEdit && (
+                <Link
+                  href={`/groups/${group.id}/edit`}
+                  style={{ fontSize: 12, fontWeight: 400, marginLeft: 10, color: "var(--link)" }}
+                >
+                  edit
+                </Link>
+              )}
             </h1>
             <div className="sub">
               Huntsville, AL

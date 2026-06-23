@@ -62,6 +62,50 @@ export async function cancelRsvp(eventId: string) {
   revalidatePath("/me");
 }
 
+export async function updateGroup(
+  groupId: string,
+  fields: { name: string; description: string; tags: string[]; external_link: string; link_label: string },
+) {
+  await requireMember();
+  const supabase = await getServerClient();
+  await supabase
+    .from("groups")
+    .update({
+      name: fields.name,
+      description: fields.description,
+      tags: fields.tags,
+      external_link: fields.external_link || null,
+      link_label: fields.link_label || null,
+      search_text: `${fields.name} ${fields.description}`.toLowerCase(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", groupId);
+  revalidatePath(`/groups/${groupId}`);
+  revalidatePath("/groups");
+}
+
+export async function updateEvent(
+  eventId: string,
+  fields: { name: string; description: string; tags: string[]; starts_at: string; external_link: string },
+) {
+  await requireMember();
+  const supabase = await getServerClient();
+  await supabase
+    .from("events")
+    .update({
+      name: fields.name,
+      description: fields.description,
+      tags: fields.tags,
+      starts_at: fields.starts_at,
+      external_link: fields.external_link || null,
+      search_text: `${fields.name} ${fields.description}`.toLowerCase(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", eventId);
+  revalidatePath(`/events/${eventId}`);
+  revalidatePath("/events");
+}
+
 export async function postComment(targetType: "group" | "event", targetId: string, body: string) {
   const member = await requireMember();
   const trimmed = body.trim();
