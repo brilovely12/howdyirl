@@ -31,7 +31,7 @@ function likePattern(term: string): string {
 
 export const listTags = cache(async (): Promise<Tag[]> => {
   const db = howdyDb();
-  const { data } = await db.from("tags").select("id,name,sort").order("sort");
+  const { data } = await db.from("tags").select("id,name,sort").order("name");
   return data ?? [];
 });
 
