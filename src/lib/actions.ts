@@ -111,13 +111,14 @@ export async function postComment(targetType: "group" | "event", targetId: strin
   const trimmed = body.trim();
   if (!trimmed || trimmed.length > 2000) throw new Error("Invalid comment");
   const supabase = await getServerClient();
-  await supabase.from("comments").insert({
+  const { error } = await supabase.from("comments").insert({
     target_type: targetType,
     target_id: targetId,
     author_id: member.id,
     author_handle: member.handle,
     body: trimmed,
   });
+  if (error) throw new Error(error.message);
   revalidatePath(`/${targetType}s/${targetId}`);
 }
 
@@ -186,10 +187,12 @@ export async function setContentStatus(type: "group" | "event", id: string, stat
   revalidatePath(`/${type}s`);
 }
 
-export async function deleteComment(commentId: string) {
-  await requireAdmin();
+export async function deleteComment(commentId: string, targetType?: string, targetId?: string) {
+  const member = await requireMember();
   const supabase = await getServerClient();
-  await supabase.from("comments").delete().eq("id", commentId);
+  const { error } = await supabase.from("comments").delete().eq("id", commentId);
+  if (error) throw new Error(error.message);
+  if (targetType && targetId) revalidatePath(`/${targetType}s/${targetId}`);
   revalidatePath("/admin");
 }
 

@@ -153,7 +153,7 @@ export default async function GroupDetail({ params }: { params: Promise<{ id: st
           )}
         </div>
 
-        <Comments comments={comments} loggedIn={loggedIn} targetType="group" targetId={group.id} />
+        <Comments comments={comments} loggedIn={loggedIn} targetType="group" targetId={group.id} sessionHandle={session?.member?.handle} isAdmin={isAdmin} />
       </div>
     </div>
   );

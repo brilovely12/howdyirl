@@ -131,7 +131,7 @@ export default async function EventDetail({ params }: { params: Promise<{ id: st
           </div>
         )}
 
-        <Comments comments={comments} loggedIn={loggedIn} targetType="event" targetId={event.id} />
+        <Comments comments={comments} loggedIn={loggedIn} targetType="event" targetId={event.id} sessionHandle={session?.member?.handle} isAdmin={isAdmin} />
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Comment } from "@/lib/types";
 import { stamp } from "@/lib/format";
 import CommentForm from "./CommentForm";
+import DeleteComment from "./DeleteComment";
 
 const ADMIN_HANDLES = ["brilovely"];
 
@@ -10,11 +11,15 @@ export default function Comments({
   loggedIn,
   targetType,
   targetId,
+  sessionHandle,
+  isAdmin,
 }: {
   comments: Comment[];
   loggedIn: boolean;
   targetType: "group" | "event";
   targetId: string;
+  sessionHandle?: string | null;
+  isAdmin?: boolean;
 }) {
   return (
     <div className="upcoming">
@@ -29,6 +34,9 @@ export default function Comments({
                 {stamp(c.created_at)}
                 {c.edited ? " · edited" : ""}
               </span>
+              {(isAdmin || sessionHandle === c.author_handle) && (
+                <DeleteComment commentId={c.id} targetType={targetType} targetId={targetId} />
+              )}
             </div>
             {c.quote_handle && (
               <div className="cmt-quote">
