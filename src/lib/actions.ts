@@ -74,7 +74,6 @@ export async function updateGroup(
     tags: fields.tags,
     external_link: fields.external_link || null,
     link_label: fields.link_label || null,
-    search_text: `${fields.name} ${fields.description}`.toLowerCase(),
     updated_at: new Date().toISOString(),
   };
   if (fields.image_url !== undefined) row.image_url = fields.image_url;
@@ -98,7 +97,6 @@ export async function updateEvent(
       tags: fields.tags,
       starts_at: fields.starts_at,
       external_link: fields.external_link || null,
-      search_text: `${fields.name} ${fields.description}`.toLowerCase(),
       updated_at: new Date().toISOString(),
     })
     .eq("id", eventId);
