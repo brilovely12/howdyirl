@@ -38,6 +38,8 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
           description: event.description,
           tags: event.tags,
           starts_at: event.starts_at,
+          recurrence: event.recurrence,
+          recurrence_end: event.recurrence_end,
           external_link: event.external_link,
           host_group_id: event.host_group_id,
           image_url: event.image_url,

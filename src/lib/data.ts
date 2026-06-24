@@ -38,7 +38,7 @@ export const listTags = cache(async (): Promise<Tag[]> => {
 const GROUP_COLS =
   "id,creator_id,creator_handle,name,description,claimed,joins_count,external_link,link_label,image_url,images,tags,status,updated_at";
 const EVENT_COLS =
-  "id,creator_id,creator_handle,host_group_id,host_group_name,name,description,starts_at,external_link,image_url,images,tags,status";
+  "id,creator_id,creator_handle,host_group_id,host_group_name,name,description,starts_at,recurrence,recurrence_end,external_link,image_url,images,tags,status";
 
 export type ListParams = { q?: string; tags?: string[]; page?: number; when?: string };
 
@@ -95,6 +95,29 @@ function whenEnd(when: string | undefined): string | null {
   return null;
 }
 
+function nextOccurrence(startsAt: string, recurrence: string | null, recurrenceEnd: string | null): string | null {
+  const now = new Date();
+  const maxDate = new Date(now.getTime() + 2 * 365.25 * 24 * 60 * 60 * 1000);
+  const start = new Date(startsAt);
+
+  if (!recurrence) {
+    return start >= now ? startsAt : null;
+  }
+
+  let next = new Date(start);
+  while (next < now) {
+    if (recurrence === "weekly") next.setDate(next.getDate() + 7);
+    else if (recurrence === "monthly") next.setMonth(next.getMonth() + 1);
+    else if (recurrence === "annually") next.setFullYear(next.getFullYear() + 1);
+    else return null;
+  }
+
+  if (recurrenceEnd && next > new Date(recurrenceEnd)) return null;
+  if (next > maxDate) return null;
+
+  return next.toISOString();
+}
+
 export async function searchEvents({ q, tags, when, page = 1 }: ListParams): Promise<SearchResult<EventRow>> {
   const cityId = await getCityId();
   if (!cityId) return { rows: [], total: 0 };
@@ -102,22 +125,32 @@ export async function searchEvents({ q, tags, when, page = 1 }: ListParams): Pro
   const db = howdyDb();
   let query = db
     .from("events")
-    .select(EVENT_COLS, { count: "exact" })
+    .select(EVENT_COLS)
     .eq("city_id", cityId)
     .eq("status", "live")
-    .gte("starts_at", new Date().toISOString());
-
-  const end = whenEnd(when);
-  if (end) query = query.lte("starts_at", end);
+    .or(`starts_at.gte.${new Date().toISOString()},recurrence.not.is.null`);
 
   if (tags?.length) query = query.contains("tags", tags);
   for (const term of queryTerms(q)) query = query.ilike("search_text", likePattern(term));
 
-  const from = (page - 1) * PAGE_SIZE;
-  query = query.order("starts_at", { ascending: true }).range(from, from + PAGE_SIZE - 1);
+  const { data } = await query;
+  let events = ((data ?? []) as EventRow[])
+    .map((e) => {
+      const next = nextOccurrence(e.starts_at, e.recurrence, e.recurrence_end);
+      return next ? { ...e, next_at: next } : null;
+    })
+    .filter(Boolean) as EventRow[];
 
-  const { data, count } = await query;
-  return { rows: (data ?? []) as EventRow[], total: count ?? 0 };
+  const end = whenEnd(when);
+  if (end) events = events.filter((e) => e.next_at! <= end);
+
+  events.sort((a, b) => new Date(a.next_at!).getTime() - new Date(b.next_at!).getTime());
+
+  const total = events.length;
+  const from = (page - 1) * PAGE_SIZE;
+  const rows = events.slice(from, from + PAGE_SIZE);
+
+  return { rows, total };
 }
 
 /** Live counts for the subnav tabs. */
@@ -132,7 +165,7 @@ export const listCounts = cache(async (): Promise<{ groups: number; events: numb
       .select("id", { count: "exact", head: true })
       .eq("city_id", cityId)
       .eq("status", "live")
-      .gte("starts_at", new Date().toISOString()),
+      .or(`starts_at.gte.${new Date().toISOString()},recurrence.not.is.null`),
   ]);
   return { groups: g.count ?? 0, events: e.count ?? 0 };
 });
@@ -150,7 +183,10 @@ export async function getEvent(id: string, anyStatus = false): Promise<EventRow 
   let query = db.from("events").select(EVENT_COLS).eq("id", id);
   if (!anyStatus) query = query.eq("status", "live");
   const { data } = await query.maybeSingle();
-  return (data as EventRow) ?? null;
+  if (!data) return null;
+  const event = data as EventRow;
+  event.next_at = nextOccurrence(event.starts_at, event.recurrence, event.recurrence_end) ?? event.starts_at;
+  return event;
 }
 
 export async function getGroupUpdates(groupId: string): Promise<Update[]> {

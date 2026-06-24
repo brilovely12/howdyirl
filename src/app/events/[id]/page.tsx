@@ -71,9 +71,14 @@ export default async function EventDetail({ params }: { params: Promise<{ id: st
             <div className="sub">
               <span className="tag evt">event</span> ·{" "}
               <b style={{ color: "var(--amber)", fontFamily: "var(--mono)" }}>
-                {eventDate(event.starts_at)} · {eventTime(event.starts_at)}
+                {eventDate(event.next_at ?? event.starts_at)} · {eventTime(event.starts_at)}
               </b>{" "}
-              · Huntsville, AL
+              {event.recurrence && (
+                <span style={{ color: "var(--ink-faint)" }}>
+                  · repeats {event.recurrence}
+                </span>
+              )}
+              {" "}· Huntsville, AL
             </div>
             <p>{event.description}</p>
             <div className="meta">

@@ -24,6 +24,9 @@ export type EventRow = {
   name: string;
   description: string;
   starts_at: string;
+  recurrence: string | null;
+  recurrence_end: string | null;
+  next_at?: string;
   external_link: string | null;
   image_url: string | null;
   images: string[];

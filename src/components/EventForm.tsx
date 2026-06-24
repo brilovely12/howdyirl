@@ -13,6 +13,8 @@ type Existing = {
   description: string;
   tags: string[];
   starts_at: string;
+  recurrence: string | null;
+  recurrence_end: string | null;
   external_link: string | null;
   host_group_id: string | null;
   image_url: string | null;
@@ -40,6 +42,8 @@ export default function EventForm({
   const [description, setDescription] = useState(existing?.description ?? "");
   const [date, setDate] = useState(initDate);
   const [time, setTime] = useState(initTime);
+  const [recurrence, setRecurrence] = useState(existing?.recurrence ?? "");
+  const [recurrenceEnd, setRecurrenceEnd] = useState(existing?.recurrence_end ? existing.recurrence_end.slice(0, 10) : "");
   const [externalLink, setExternalLink] = useState(existing?.external_link ?? "");
   const [hostGroupId, setHostGroupId] = useState(existing?.host_group_id ?? "");
   const [selected, setSelected] = useState<string[]>(existing?.tags ?? []);
@@ -67,6 +71,8 @@ export default function EventForm({
           name, description, tags: selected,
           starts_at: `${date}T${time}`,
           external_link: externalLink,
+          recurrence: recurrence || null,
+          recurrence_end: recurrenceEnd ? `${recurrenceEnd}T23:59` : null,
           image_url: imageUrl, images,
         });
         window.location.assign(`/events/${existing!.id}`);
@@ -82,6 +88,8 @@ export default function EventForm({
       p_starts_local: `${date}T${time}`,
       p_external_link: externalLink,
       p_host_group_id: hostGroupId || null,
+      p_recurrence: recurrence || null,
+      p_recurrence_end: recurrenceEnd ? `${recurrenceEnd}T23:59` : null,
     });
     if (rpcErr) {
       setBusy(false);
@@ -91,11 +99,13 @@ export default function EventForm({
         return setError("You can only post on behalf of a group you run.");
       return setError("Couldn't post your event. Please try again.");
     }
-    if (imageUrl || images.length) {
+    if (imageUrl || images.length || recurrence) {
       await updateEvent(data, {
         name, description, tags: selected,
         starts_at: `${date}T${time}`,
         external_link: externalLink,
+        recurrence: recurrence || null,
+        recurrence_end: recurrenceEnd ? `${recurrenceEnd}T23:59` : null,
         image_url: imageUrl, images,
       });
     }
@@ -130,6 +140,22 @@ export default function EventForm({
           <input type="time" value={time} required onChange={(e) => setTime(e.target.value)} />
         </div>
       </div>
+
+      <label>repeats <span style={{ textTransform: "none", color: "var(--ink-faint)" }}>(optional)</span></label>
+      <select value={recurrence} onChange={(e) => setRecurrence(e.target.value)}>
+        <option value="">Does not repeat</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+        <option value="annually">Annually</option>
+      </select>
+
+      {recurrence && (
+        <>
+          <label>end date <span style={{ textTransform: "none", color: "var(--ink-faint)" }}>(optional)</span></label>
+          <input type="date" value={recurrenceEnd} onChange={(e) => setRecurrenceEnd(e.target.value)} />
+          <div className="hint">Leave blank to repeat indefinitely (up to 2 years out).</div>
+        </>
+      )}
 
       {!editing && (
         <>

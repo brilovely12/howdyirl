@@ -33,8 +33,9 @@ export default function EventRow({ event, index }: { event: EventRowType; index:
         </div>
       </div>
       <div className="when">
-        <b>{eventDate(event.starts_at)}</b>
+        <b>{eventDate(event.next_at ?? event.starts_at)}</b>
         {eventTime(event.starts_at)}
+        {event.recurrence && <span className="recur">{event.recurrence}</span>}
       </div>
     </Link>
   );

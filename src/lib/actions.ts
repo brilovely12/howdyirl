@@ -90,7 +90,7 @@ export async function updateGroup(
 
 export async function updateEvent(
   eventId: string,
-  fields: { name: string; description: string; tags: string[]; starts_at: string; external_link: string; image_url?: string | null; images?: string[] },
+  fields: { name: string; description: string; tags: string[]; starts_at: string; external_link: string; recurrence?: string | null; recurrence_end?: string | null; image_url?: string | null; images?: string[] },
 ) {
   await requireMember();
   const supabase = await getServerClient();
@@ -102,6 +102,8 @@ export async function updateEvent(
     external_link: fields.external_link || null,
     updated_at: new Date().toISOString(),
   };
+  if (fields.recurrence !== undefined) row.recurrence = fields.recurrence || null;
+  if (fields.recurrence_end !== undefined) row.recurrence_end = fields.recurrence_end || null;
   if (fields.image_url !== undefined) row.image_url = fields.image_url;
   if (fields.images !== undefined) row.images = fields.images;
   const { error } = await supabase.from("events").update(row).eq("id", eventId);
