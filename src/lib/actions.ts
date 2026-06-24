@@ -64,22 +64,22 @@ export async function cancelRsvp(eventId: string) {
 
 export async function updateGroup(
   groupId: string,
-  fields: { name: string; description: string; tags: string[]; external_link: string; link_label: string },
+  fields: { name: string; description: string; tags: string[]; external_link: string; link_label: string; image_url?: string | null },
 ) {
   await requireMember();
   const supabase = await getServerClient();
-  await supabase
-    .from("groups")
-    .update({
-      name: fields.name,
-      description: fields.description,
-      tags: fields.tags,
-      external_link: fields.external_link || null,
-      link_label: fields.link_label || null,
-      search_text: `${fields.name} ${fields.description}`.toLowerCase(),
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", groupId);
+  const row: Record<string, unknown> = {
+    name: fields.name,
+    description: fields.description,
+    tags: fields.tags,
+    external_link: fields.external_link || null,
+    link_label: fields.link_label || null,
+    search_text: `${fields.name} ${fields.description}`.toLowerCase(),
+    updated_at: new Date().toISOString(),
+  };
+  if (fields.image_url !== undefined) row.image_url = fields.image_url;
+  const { error } = await supabase.from("groups").update(row).eq("id", groupId);
+  if (error) throw new Error(error.message);
   revalidatePath(`/groups/${groupId}`);
   revalidatePath("/groups");
 }
@@ -90,7 +90,7 @@ export async function updateEvent(
 ) {
   await requireMember();
   const supabase = await getServerClient();
-  await supabase
+  const { error } = await supabase
     .from("events")
     .update({
       name: fields.name,
@@ -102,6 +102,7 @@ export async function updateEvent(
       updated_at: new Date().toISOString(),
     })
     .eq("id", eventId);
+  if (error) throw new Error(error.message);
   revalidatePath(`/events/${eventId}`);
   revalidatePath("/events");
 }

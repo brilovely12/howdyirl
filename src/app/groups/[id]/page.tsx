@@ -52,9 +52,13 @@ export default async function GroupDetail({ params }: { params: Promise<{ id: st
 
       <div className="detail">
         <div className="detail-top">
-          <div className="hero" style={{ background: color(initials(group.name).length + group.name.length) }}>
-            {initials(group.name)}
-          </div>
+          {group.image_url ? (
+            <img className="hero" src={group.image_url} alt="" style={{ objectFit: "cover" }} />
+          ) : (
+            <div className="hero" style={{ background: color(initials(group.name).length + group.name.length) }}>
+              {initials(group.name)}
+            </div>
+          )}
           <div style={{ flex: 1, minWidth: 240 }}>
             <h1>
               {group.name}

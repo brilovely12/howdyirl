@@ -6,9 +6,13 @@ import CheckBadge from "./CheckBadge";
 export default function GroupRow({ group, index }: { group: Group; index: number }) {
   return (
     <Link href={`/groups/${group.id}`} className="row">
-      <div className="thumb" style={{ background: color(index) }}>
-        {initials(group.name)}
-      </div>
+      {group.image_url ? (
+        <img className="thumb" src={group.image_url} alt="" style={{ objectFit: "cover" }} />
+      ) : (
+        <div className="thumb" style={{ background: color(index) }}>
+          {initials(group.name)}
+        </div>
+      )}
       <div>
         <div className="ttl">
           {group.name}

@@ -11,11 +11,11 @@ export default async function EditGroupPage({ params }: { params: Promise<{ id: 
   if (!session) redirect("/login");
 
   const { id } = await params;
-  const group = await getGroup(id);
+  const isAdmin = !!session.member?.is_admin;
+  const group = await getGroup(id, isAdmin);
   if (!group) notFound();
 
   const isCreator = session.member?.id === group.creator_id;
-  const isAdmin = session.member?.is_admin;
   if (!isCreator && !isAdmin) redirect(`/groups/${id}`);
 
   const tags = await listTags();
@@ -33,6 +33,7 @@ export default async function EditGroupPage({ params }: { params: Promise<{ id: 
           tags: group.tags,
           external_link: group.external_link,
           link_label: group.link_label,
+          image_url: group.image_url,
         }}
       />
     </div>

@@ -8,6 +8,7 @@ export type Group = {
   joins_count: number;
   external_link: string | null;
   link_label: string | null;
+  image_url: string | null;
   tags: string[];
   status: string;
   updated_at: string;

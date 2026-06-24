@@ -11,11 +11,11 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
   if (!session) redirect("/login");
 
   const { id } = await params;
-  const event = await getEvent(id);
+  const isAdmin = !!session.member?.is_admin;
+  const event = await getEvent(id, isAdmin);
   if (!event) notFound();
 
   const isCreator = session.member?.id === event.creator_id;
-  const isAdmin = session.member?.is_admin;
   if (!isCreator && !isAdmin) redirect(`/events/${id}`);
 
   const [tags, myGroups] = await Promise.all([
