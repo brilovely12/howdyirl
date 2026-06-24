@@ -135,6 +135,17 @@ export async function submitReport(targetType: "group" | "event", targetId: stri
     reported_by: member.handle,
   });
   if (error) throw new Error(error.message);
+
+  const { count } = await supabase
+    .from("reports")
+    .select("id", { count: "exact", head: true })
+    .eq("target_type", targetType)
+    .eq("target_id", targetId)
+    .eq("status", "open");
+  if ((count ?? 0) >= 2) {
+    const table = targetType === "group" ? "groups" : "events";
+    await supabase.from(table).update({ status: "hidden" }).eq("id", targetId).eq("status", "live");
+  }
 }
 
 export async function submitClaim(groupId: string, contactEmail: string, note: string) {
