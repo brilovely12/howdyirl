@@ -49,9 +49,13 @@ export default async function EventDetail({ params }: { params: Promise<{ id: st
 
       <div className="detail">
         <div className="detail-top">
-          <div className="hero" style={{ background: color(initials(event.name).length + event.name.length + 3) }}>
-            {initials(event.name)}
-          </div>
+          {event.image_url ? (
+            <img className="hero" src={event.image_url} alt="" style={{ objectFit: "cover" }} />
+          ) : (
+            <div className="hero" style={{ background: color(initials(event.name).length + event.name.length + 3) }}>
+              {initials(event.name)}
+            </div>
+          )}
           <div style={{ flex: 1, minWidth: 240 }}>
             <h1>
               {event.name}
@@ -105,6 +109,14 @@ export default async function EventDetail({ params }: { params: Promise<{ id: st
             )}
           </div>
         </div>
+
+        {event.images?.length > 0 && (
+          <div className="gallery">
+            {event.images.map((src, i) => (
+              <img key={i} src={src} alt="" style={{ width: 120, height: 90, objectFit: "cover", borderRadius: 3, border: "1px solid var(--rule)" }} />
+            ))}
+          </div>
+        )}
 
         <div className="actions">
           {loggedIn ? (

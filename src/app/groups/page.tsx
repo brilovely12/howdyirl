@@ -2,6 +2,7 @@ import { searchGroups, listTags, PAGE_SIZE } from "@/lib/data";
 import { getSessionUser } from "@/lib/auth";
 import SearchBox from "@/components/SearchBox";
 import TagChips from "@/components/TagChips";
+import FilterToggle from "@/components/FilterToggle";
 import GroupRow from "@/components/GroupRow";
 import Pager from "@/components/Pager";
 
@@ -33,7 +34,7 @@ export default async function GroupsPage({
   return (
     <div className="layout">
       <aside className="side">
-        <h4>topics</h4>
+        <h4>tags</h4>
         <TagChips basePath="/groups" tags={tags} activeTags={activeTags} q={q} />
         <a className="btn post" href={postHref}>
           + Post a Group
@@ -44,7 +45,13 @@ export default async function GroupsPage({
         <SearchBox placeholder="Search groups…" />
         <div className="listhead">
           <h2>local groups</h2>
-          <span className="sort">Sort: Recently updated ▾</span>
+          <FilterToggle activeCount={activeTags.length}>
+            <TagChips basePath="/groups" tags={tags} activeTags={activeTags} q={q} />
+          </FilterToggle>
+          <span className="sort">
+            <svg className="sort-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M4 3v10M4 13l-2.5-3M4 13l2.5-3M12 13V3M12 3l-2.5 3M12 3l2.5 3" /></svg>
+            <span className="sort-label">Sort: Recently updated ▾</span>
+          </span>
         </div>
 
         {rows.length ? (

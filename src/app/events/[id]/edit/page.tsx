@@ -40,6 +40,8 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
           starts_at: event.starts_at,
           external_link: event.external_link,
           host_group_id: event.host_group_id,
+          image_url: event.image_url,
+          images: event.images ?? [],
         }}
       />
     </div>

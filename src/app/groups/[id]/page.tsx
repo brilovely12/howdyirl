@@ -106,6 +106,14 @@ export default async function GroupDetail({ params }: { params: Promise<{ id: st
           </div>
         </div>
 
+        {group.images?.length > 0 && (
+          <div className="gallery">
+            {group.images.map((src, i) => (
+              <img key={i} src={src} alt="" style={{ width: 120, height: 90, objectFit: "cover", borderRadius: 3, border: "1px solid var(--rule)" }} />
+            ))}
+          </div>
+        )}
+
         <div className="upcoming">
           <h4>upcoming events from this group</h4>
           {events.length ? (

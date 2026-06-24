@@ -36,9 +36,9 @@ export const listTags = cache(async (): Promise<Tag[]> => {
 });
 
 const GROUP_COLS =
-  "id,creator_id,creator_handle,name,description,claimed,joins_count,external_link,link_label,image_url,tags,status,updated_at";
+  "id,creator_id,creator_handle,name,description,claimed,joins_count,external_link,link_label,image_url,images,tags,status,updated_at";
 const EVENT_COLS =
-  "id,creator_id,creator_handle,host_group_id,host_group_name,name,description,starts_at,external_link,tags,status";
+  "id,creator_id,creator_handle,host_group_id,host_group_name,name,description,starts_at,external_link,image_url,images,tags,status";
 
 export type ListParams = { q?: string; tags?: string[]; page?: number; when?: string };
 

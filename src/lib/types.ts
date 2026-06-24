@@ -9,6 +9,7 @@ export type Group = {
   external_link: string | null;
   link_label: string | null;
   image_url: string | null;
+  images: string[];
   tags: string[];
   status: string;
   updated_at: string;
@@ -24,6 +25,8 @@ export type EventRow = {
   description: string;
   starts_at: string;
   external_link: string | null;
+  image_url: string | null;
+  images: string[];
   tags: string[];
   status: string;
 };

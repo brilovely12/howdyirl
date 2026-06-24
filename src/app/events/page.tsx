@@ -3,6 +3,7 @@ import { searchEvents, listTags, PAGE_SIZE } from "@/lib/data";
 import { getSessionUser } from "@/lib/auth";
 import SearchBox from "@/components/SearchBox";
 import TagChips from "@/components/TagChips";
+import FilterToggle from "@/components/FilterToggle";
 import EventRow from "@/components/EventRow";
 import Pager from "@/components/Pager";
 
@@ -61,7 +62,7 @@ export default async function EventsPage({
             </li>
           ))}
         </ul>
-        <h4>topics</h4>
+        <h4>tags</h4>
         <TagChips basePath="/events" tags={tags} activeTags={activeTags} q={q} />
         <a className="btn post" href={postHref}>
           + Post an Event
@@ -72,7 +73,13 @@ export default async function EventsPage({
         <SearchBox placeholder="Search events…" />
         <div className="listhead">
           <h2>upcoming events</h2>
-          <span className="sort">Sort: Soonest ▾</span>
+          <FilterToggle activeCount={activeTags.length}>
+            <TagChips basePath="/events" tags={tags} activeTags={activeTags} q={q} />
+          </FilterToggle>
+          <span className="sort">
+            <svg className="sort-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M4 3v10M4 13l-2.5-3M4 13l2.5-3M12 13V3M12 3l-2.5 3M12 3l2.5 3" /></svg>
+            <span className="sort-label">Sort: Soonest ▾</span>
+          </span>
         </div>
 
         {rows.length ? (

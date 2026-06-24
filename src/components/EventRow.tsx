@@ -5,9 +5,13 @@ import { color, initials, eventDate, eventTime } from "@/lib/format";
 export default function EventRow({ event, index }: { event: EventRowType; index: number }) {
   return (
     <Link href={`/events/${event.id}`} className="row">
-      <div className="thumb" style={{ background: color(index + 3) }}>
-        {initials(event.name)}
-      </div>
+      {event.image_url ? (
+        <img className="thumb" src={event.image_url} alt="" style={{ objectFit: "cover" }} />
+      ) : (
+        <div className="thumb" style={{ background: color(index + 3) }}>
+          {initials(event.name)}
+        </div>
+      )}
       <div>
         <div className="ttl">{event.name}</div>
         <div className="desc">{event.description}</div>

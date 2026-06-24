@@ -68,7 +68,7 @@ export async function cancelRsvp(eventId: string) {
 
 export async function updateGroup(
   groupId: string,
-  fields: { name: string; description: string; tags: string[]; external_link: string; link_label: string; image_url?: string | null },
+  fields: { name: string; description: string; tags: string[]; external_link: string; link_label: string; image_url?: string | null; images?: string[] },
 ) {
   await requireMember();
   const supabase = await getServerClient();
@@ -81,6 +81,7 @@ export async function updateGroup(
     updated_at: new Date().toISOString(),
   };
   if (fields.image_url !== undefined) row.image_url = fields.image_url;
+  if (fields.images !== undefined) row.images = fields.images;
   const { error } = await supabase.from("groups").update(row).eq("id", groupId);
   if (error) throw new Error(error.message);
   revalidatePath(`/groups/${groupId}`);
@@ -89,21 +90,21 @@ export async function updateGroup(
 
 export async function updateEvent(
   eventId: string,
-  fields: { name: string; description: string; tags: string[]; starts_at: string; external_link: string },
+  fields: { name: string; description: string; tags: string[]; starts_at: string; external_link: string; image_url?: string | null; images?: string[] },
 ) {
   await requireMember();
   const supabase = await getServerClient();
-  const { error } = await supabase
-    .from("events")
-    .update({
-      name: fields.name,
-      description: fields.description,
-      tags: fields.tags,
-      starts_at: fields.starts_at,
-      external_link: fields.external_link || null,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", eventId);
+  const row: Record<string, unknown> = {
+    name: fields.name,
+    description: fields.description,
+    tags: fields.tags,
+    starts_at: fields.starts_at,
+    external_link: fields.external_link || null,
+    updated_at: new Date().toISOString(),
+  };
+  if (fields.image_url !== undefined) row.image_url = fields.image_url;
+  if (fields.images !== undefined) row.images = fields.images;
+  const { error } = await supabase.from("events").update(row).eq("id", eventId);
   if (error) throw new Error(error.message);
   revalidatePath(`/events/${eventId}`);
   revalidatePath("/events");

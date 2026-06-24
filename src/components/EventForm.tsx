@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getBrowserClient } from "@/lib/supabase/client";
 import { updateEvent } from "@/lib/actions";
 import type { Tag } from "@/lib/types";
+import ImagePicker from "./ImagePicker";
 
 type Existing = {
   id: string;
@@ -14,6 +15,8 @@ type Existing = {
   starts_at: string;
   external_link: string | null;
   host_group_id: string | null;
+  image_url: string | null;
+  images: string[];
 };
 
 export default function EventForm({
@@ -40,6 +43,8 @@ export default function EventForm({
   const [externalLink, setExternalLink] = useState(existing?.external_link ?? "");
   const [hostGroupId, setHostGroupId] = useState(existing?.host_group_id ?? "");
   const [selected, setSelected] = useState<string[]>(existing?.tags ?? []);
+  const [imageUrl, setImageUrl] = useState<string | null>(existing?.image_url ?? null);
+  const [images, setImages] = useState<string[]>(existing?.images ?? []);
   const [agreed, setAgreed] = useState(editing);
   const [busy, setBusy] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -62,6 +67,7 @@ export default function EventForm({
           name, description, tags: selected,
           starts_at: `${date}T${time}`,
           external_link: externalLink,
+          image_url: imageUrl, images,
         });
         window.location.assign(`/events/${existing!.id}`);
       });
@@ -69,7 +75,7 @@ export default function EventForm({
     }
 
     setBusy(true);
-    const { data, error } = await supabase.rpc("create_event", {
+    const { data, error: rpcErr } = await supabase.rpc("create_event", {
       p_name: name,
       p_description: description,
       p_tags: selected,
@@ -77,15 +83,23 @@ export default function EventForm({
       p_external_link: externalLink,
       p_host_group_id: hostGroupId || null,
     });
-    setBusy(false);
-
-    if (error) {
-      if (error.message.includes("not_authenticated")) return window.location.assign("/login");
-      if (error.message.includes("no_member")) return window.location.assign("/onboarding");
-      if (error.message.includes("not_your_group"))
+    if (rpcErr) {
+      setBusy(false);
+      if (rpcErr.message.includes("not_authenticated")) return window.location.assign("/login");
+      if (rpcErr.message.includes("no_member")) return window.location.assign("/onboarding");
+      if (rpcErr.message.includes("not_your_group"))
         return setError("You can only post on behalf of a group you run.");
       return setError("Couldn't post your event. Please try again.");
     }
+    if (imageUrl || images.length) {
+      await updateEvent(data, {
+        name, description, tags: selected,
+        starts_at: `${date}T${time}`,
+        external_link: externalLink,
+        image_url: imageUrl, images,
+      });
+    }
+    setBusy(false);
     window.location.assign(`/events/${data}`);
   }
 
@@ -94,6 +108,14 @@ export default function EventForm({
   return (
     <form className="form" onSubmit={submit}>
       <h2>{editing ? "Edit event" : "Post an Event"}</h2>
+
+      <ImagePicker
+        mainImage={imageUrl}
+        onMainChange={setImageUrl}
+        gallery={images}
+        onGalleryChange={setImages}
+        folder="events"
+      />
 
       <label>event name</label>
       <input value={name} required minLength={3} placeholder="e.g. Saturday Farmers Market Meetup" onChange={(e) => setName(e.target.value)} />
@@ -132,7 +154,7 @@ export default function EventForm({
       <textarea value={description} placeholder="What's happening, what to bring, where exactly?" onChange={(e) => setDescription(e.target.value)} />
 
       <label>
-        topics <span style={{ textTransform: "none", color: "var(--ink-faint)" }}>(pick any that fit)</span>
+        tags <span style={{ textTransform: "none", color: "var(--ink-faint)" }}>(pick any that fit)</span>
       </label>
       <div>
         {tags.map((t) => (

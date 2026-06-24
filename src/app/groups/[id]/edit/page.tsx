@@ -34,6 +34,7 @@ export default async function EditGroupPage({ params }: { params: Promise<{ id: 
           external_link: group.external_link,
           link_label: group.link_label,
           image_url: group.image_url,
+          images: group.images ?? [],
         }}
       />
     </div>
