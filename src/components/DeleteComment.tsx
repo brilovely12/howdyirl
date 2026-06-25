@@ -9,7 +9,7 @@ export default function DeleteComment({
   targetId,
 }: {
   commentId: string;
-  targetType: "group" | "event";
+  targetType: "group" | "event" | "thread";
   targetId: string;
 }) {
   const [pending, start] = useTransition();
