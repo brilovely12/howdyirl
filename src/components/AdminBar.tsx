@@ -8,7 +8,7 @@ export default function AdminBar({
   id,
   status,
 }: {
-  type: "group" | "event";
+  type: "group" | "event" | "thread";
   id: string;
   status: string;
 }) {

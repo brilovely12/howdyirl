@@ -14,6 +14,7 @@ export default function SubNav({
   const pathname = usePathname();
   const isGroups = pathname === "/groups" || pathname.startsWith("/groups/");
   const isEvents = pathname === "/events" || pathname.startsWith("/events/");
+  const isForums = pathname === "/forums" || pathname.startsWith("/forums/");
 
   return (
     <div className="subnav">
@@ -23,6 +24,9 @@ export default function SubNav({
         </Link>
         <Link href="/events" className={`tab${isEvents ? " active" : ""}`}>
           Events <span className="ct">({counts.events})</span>
+        </Link>
+        <Link href="/forums" className={`tab${isForums ? " active" : ""}`}>
+          Forums
         </Link>
         {navPages.map((p) => (
           <Link

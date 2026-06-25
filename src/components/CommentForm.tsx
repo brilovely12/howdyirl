@@ -7,7 +7,7 @@ export default function CommentForm({
   targetType,
   targetId,
 }: {
-  targetType: "group" | "event";
+  targetType: "group" | "event" | "thread";
   targetId: string;
 }) {
   const [body, setBody] = useState("");

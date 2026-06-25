@@ -46,6 +46,19 @@ export type Comment = {
   created_at: string;
 };
 
+export type Thread = {
+  id: string;
+  creator_id: string | null;
+  creator_handle: string;
+  section: string;
+  title: string;
+  body: string;
+  status: string;
+  reply_count: number;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Tag = { id: string; name: string; sort: number };
 
 export type Page = {

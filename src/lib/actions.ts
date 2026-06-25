@@ -112,7 +112,7 @@ export async function updateEvent(
   revalidatePath("/events");
 }
 
-export async function postComment(targetType: "group" | "event", targetId: string, body: string) {
+export async function postComment(targetType: "group" | "event" | "thread", targetId: string, body: string) {
   const member = await requireMember();
   const trimmed = body.trim();
   if (!trimmed || trimmed.length > 2000) throw new Error("Invalid comment");
@@ -125,6 +125,10 @@ export async function postComment(targetType: "group" | "event", targetId: strin
     body: trimmed,
   });
   if (error) throw new Error(error.message);
+  if (targetType === "thread") {
+    await supabase.rpc("increment_reply_count", { p_thread_id: targetId });
+    revalidatePath(`/forums`);
+  }
   revalidatePath(`/${targetType}s/${targetId}`);
 }
 
@@ -201,15 +205,27 @@ export async function decideClaim(claimId: string, groupId: string, approve: boo
 
 // --- Content moderation ---
 
-export async function setContentStatus(type: "group" | "event", id: string, status: "live" | "hidden" | "removed") {
+export async function setContentStatus(type: "group" | "event" | "thread", id: string, status: "live" | "hidden" | "removed") {
   await requireAdmin();
   const supabase = await getServerClient();
-  const table = type === "group" ? "groups" : "events";
+  const table = type === "group" ? "groups" : type === "event" ? "events" : "threads";
   const { error } = await supabase.from(table).update({ status }).eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/admin");
-  revalidatePath(`/${type}s/${id}`);
-  revalidatePath(`/${type}s`);
+  if (type === "thread") {
+    revalidatePath(`/forums`);
+  } else {
+    revalidatePath(`/${type}s/${id}`);
+    revalidatePath(`/${type}s`);
+  }
+}
+
+export async function deleteThread(threadId: string) {
+  const member = await requireMember();
+  const supabase = await getServerClient();
+  const { error } = await supabase.from("threads").delete().eq("id", threadId);
+  if (error) throw new Error(error.message);
+  revalidatePath("/forums");
 }
 
 export async function deleteComment(commentId: string, targetType?: string, targetId?: string) {

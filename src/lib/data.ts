@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { howdyDb } from "./supabase";
-import type { Group, EventRow, Update, Comment, Tag, Page, Notification, SearchResult } from "./types";
+import type { Group, EventRow, Update, Comment, Tag, Thread, Page, Notification, SearchResult } from "./types";
 
 export const PAGE_SIZE = 10;
 
@@ -234,7 +234,7 @@ export async function getGroupsByCreator(memberId: string): Promise<{ id: string
   return data ?? [];
 }
 
-export async function getComments(targetType: "group" | "event", targetId: string): Promise<Comment[]> {
+export async function getComments(targetType: "group" | "event" | "thread", targetId: string): Promise<Comment[]> {
   const db = howdyDb();
   const { data } = await db
     .from("comments")
@@ -243,6 +243,52 @@ export async function getComments(targetType: "group" | "event", targetId: strin
     .eq("target_id", targetId)
     .order("created_at", { ascending: true });
   return data ?? [];
+}
+
+const THREAD_COLS = "id,creator_id,creator_handle,section,title,body,status,reply_count,created_at,updated_at";
+
+export const SECTIONS = ["introductions", "general", "random", "feedback"] as const;
+export type Section = (typeof SECTIONS)[number];
+
+export async function listThreads(section: Section, page = 1): Promise<SearchResult<Thread>> {
+  const cityId = await getCityId();
+  if (!cityId) return { rows: [], total: 0 };
+  const db = howdyDb();
+  const from = (page - 1) * PAGE_SIZE;
+  const { data, count } = await db
+    .from("threads")
+    .select(THREAD_COLS, { count: "exact" })
+    .eq("city_id", cityId)
+    .eq("section", section)
+    .eq("status", "live")
+    .order("updated_at", { ascending: false })
+    .range(from, from + PAGE_SIZE - 1);
+  return { rows: (data ?? []) as Thread[], total: count ?? 0 };
+}
+
+export async function getThread(id: string, anyStatus = false): Promise<Thread | null> {
+  const db = howdyDb();
+  let query = db.from("threads").select(THREAD_COLS).eq("id", id);
+  if (!anyStatus) query = query.eq("status", "live");
+  const { data } = await query.maybeSingle();
+  return (data as Thread) ?? null;
+}
+
+export async function getSectionCounts(): Promise<Record<string, number>> {
+  const cityId = await getCityId();
+  if (!cityId) return {};
+  const db = howdyDb();
+  const counts: Record<string, number> = {};
+  for (const s of SECTIONS) {
+    const { count } = await db
+      .from("threads")
+      .select("id", { count: "exact", head: true })
+      .eq("city_id", cityId)
+      .eq("section", s)
+      .eq("status", "live");
+    counts[s] = count ?? 0;
+  }
+  return counts;
 }
 
 export const getNavPages = cache(async (): Promise<Page[]> => {
