@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getThread, getComments, SECTIONS } from "@/lib/data";
-import type { Section } from "@/lib/data";
+import { getThread, getComments, getForumSections } from "@/lib/data";
 import { getSessionUser } from "@/lib/auth";
 import { stamp } from "@/lib/format";
 import Comments from "@/components/Comments";
@@ -10,20 +9,15 @@ import DeleteThreadButton from "@/components/DeleteThreadButton";
 
 export const dynamic = "force-dynamic";
 
-const LABELS: Record<string, string> = {
-  introductions: "Introductions",
-  general: "General",
-  random: "Random",
-  feedback: "Feedback",
-};
-
 export default async function ThreadDetail({
   params,
 }: {
   params: Promise<{ section: string; id: string }>;
 }) {
   const { section, id } = await params;
-  if (!SECTIONS.includes(section as Section)) notFound();
+  const sections = await getForumSections();
+  const match = sections.find((s) => s.slug === section);
+  if (!match) notFound();
 
   const session = await getSessionUser();
   const isAdmin = !!session?.member?.is_admin;
@@ -37,7 +31,7 @@ export default async function ThreadDetail({
   return (
     <div style={{ maxWidth: 700, margin: "0 auto" }}>
       <Link className="back" href={`/forums/${section}`}>
-        ‹ {LABELS[section]}
+        ‹ {match.label}
       </Link>
 
       {isAdmin && <AdminBar type="thread" id={thread.id} status={thread.status} />}

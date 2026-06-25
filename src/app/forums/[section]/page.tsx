@@ -1,19 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { listThreads, SECTIONS, PAGE_SIZE } from "@/lib/data";
-import type { Section } from "@/lib/data";
+import { listThreads, getForumSections, PAGE_SIZE } from "@/lib/data";
 import { getSessionUser } from "@/lib/auth";
 import { stamp } from "@/lib/format";
 import Pager from "@/components/Pager";
 
 export const dynamic = "force-dynamic";
-
-const LABELS: Record<string, string> = {
-  introductions: "Introductions",
-  general: "General",
-  random: "Random",
-  feedback: "Feedback",
-};
 
 export default async function SectionPage({
   params,
@@ -23,12 +15,15 @@ export default async function SectionPage({
   searchParams: Promise<{ page?: string }>;
 }) {
   const { section } = await params;
-  if (!SECTIONS.includes(section as Section)) notFound();
+  const sections = await getForumSections();
+  const match = sections.find((s) => s.slug === section);
+  if (!match) notFound();
+
   const sp = await searchParams;
   const page = Math.max(1, parseInt(sp.page ?? "1", 10) || 1);
 
   const [{ rows, total }, session] = await Promise.all([
-    listThreads(section as Section, page),
+    listThreads(section, page),
     getSessionUser(),
   ]);
 
@@ -39,7 +34,7 @@ export default async function SectionPage({
       <Link className="back" href="/forums">‹ All forums</Link>
 
       <div className="listhead">
-        <h2>{LABELS[section]}</h2>
+        <h2>{match.label}</h2>
         <a className="btn post" href={postHref} style={{ marginLeft: "auto", width: "auto" }}>+ New Thread</a>
       </div>
 

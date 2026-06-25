@@ -61,6 +61,14 @@ export type Thread = {
 
 export type Tag = { id: string; name: string; sort: number };
 
+export type ForumSection = {
+  id: string;
+  slug: string;
+  label: string;
+  description: string;
+  sort: number;
+};
+
 export type Page = {
   id: string;
   title: string;

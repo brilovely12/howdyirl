@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { howdyDb } from "./supabase";
-import type { Group, EventRow, Update, Comment, Tag, Thread, Page, Notification, SearchResult } from "./types";
+import type { Group, EventRow, Update, Comment, Tag, Thread, Page, Notification, ForumSection, SearchResult } from "./types";
 
 export const PAGE_SIZE = 10;
 
@@ -247,10 +247,16 @@ export async function getComments(targetType: "group" | "event" | "thread", targ
 
 const THREAD_COLS = "id,creator_id,creator_handle,section,title,body,status,reply_count,created_at,updated_at";
 
-export const SECTIONS = ["introductions", "general", "random", "feedback"] as const;
-export type Section = (typeof SECTIONS)[number];
+export async function getForumSections(): Promise<ForumSection[]> {
+  const db = howdyDb();
+  const { data } = await db
+    .from("forum_sections")
+    .select("id,slug,label,description,sort")
+    .order("sort");
+  return (data ?? []) as ForumSection[];
+}
 
-export async function listThreads(section: Section, page = 1): Promise<SearchResult<Thread>> {
+export async function listThreads(section: string, page = 1): Promise<SearchResult<Thread>> {
   const cityId = await getCityId();
   if (!cityId) return { rows: [], total: 0 };
   const db = howdyDb();
@@ -278,15 +284,16 @@ export async function getSectionCounts(): Promise<Record<string, number>> {
   const cityId = await getCityId();
   if (!cityId) return {};
   const db = howdyDb();
+  const sections = await getForumSections();
   const counts: Record<string, number> = {};
-  for (const s of SECTIONS) {
+  for (const s of sections) {
     const { count } = await db
       .from("threads")
       .select("id", { count: "exact", head: true })
       .eq("city_id", cityId)
-      .eq("section", s)
+      .eq("section", s.slug)
       .eq("status", "live");
-    counts[s] = count ?? 0;
+    counts[s.slug] = count ?? 0;
   }
   return counts;
 }

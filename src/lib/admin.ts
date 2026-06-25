@@ -59,6 +59,14 @@ export type AdminTag = {
   sort: number;
 };
 
+export type AdminForumSection = {
+  id: string;
+  slug: string;
+  label: string;
+  description: string;
+  sort: number;
+};
+
 export type AdminContent = {
   id: string;
   type: "group" | "event";
@@ -199,6 +207,17 @@ export async function getAdminTags(): Promise<AdminTag[]> {
     .select("id, name, sort")
     .order("sort");
   return (data ?? []) as AdminTag[];
+}
+
+// --- Forum Sections ---
+
+export async function getAdminForumSections(): Promise<AdminForumSection[]> {
+  const db = howdyDb();
+  const { data } = await db
+    .from("forum_sections")
+    .select("id, slug, label, description, sort")
+    .order("sort");
+  return (data ?? []) as AdminForumSection[];
 }
 
 // --- Activity feed ---

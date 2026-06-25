@@ -306,6 +306,42 @@ export async function deleteTag(tagId: string) {
   revalidatePath("/events");
 }
 
+// --- Forum Sections ---
+
+export async function saveForumSection(
+  id: string | null,
+  slug: string,
+  label: string,
+  description: string,
+  sort: number,
+) {
+  await requireAdmin();
+  const supabase = await getServerClient();
+  if (id) {
+    const { error } = await supabase
+      .from("forum_sections")
+      .update({ slug, label, description, sort })
+      .eq("id", id);
+    if (error) throw new Error(error.message);
+  } else {
+    const { error } = await supabase
+      .from("forum_sections")
+      .insert({ slug, label, description, sort });
+    if (error) throw new Error(error.message);
+  }
+  revalidatePath("/admin");
+  revalidatePath("/forums");
+}
+
+export async function deleteForumSection(sectionId: string) {
+  await requireAdmin();
+  const supabase = await getServerClient();
+  const { error } = await supabase.from("forum_sections").delete().eq("id", sectionId);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin");
+  revalidatePath("/forums");
+}
+
 // --- Broadcast notification ---
 
 export async function broadcastNotification(body: string) {

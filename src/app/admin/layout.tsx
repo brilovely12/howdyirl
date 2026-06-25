@@ -12,6 +12,7 @@ const tabs = [
   { href: "/admin/comments", label: "Comments" },
   { href: "/admin/pages", label: "Pages" },
   { href: "/admin/tags", label: "Tags" },
+  { href: "/admin/forums", label: "Forums" },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
