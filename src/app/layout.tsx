@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Quicksand } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
@@ -25,6 +26,13 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className={quicksand.variable}>
+      <Script src="https://www.googletagmanager.com/gtag/js?id=G-9Y9HD88R5Y" strategy="afterInteractive" />
+      <Script id="gtag-init" strategy="afterInteractive">{`
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-9Y9HD88R5Y');
+      `}</Script>
       <body>
         <Header />
         <SubNav counts={counts} navPages={navPages} />
