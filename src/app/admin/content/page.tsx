@@ -8,7 +8,7 @@ export default async function ContentPage() {
 
   return (
     <div className="upcoming">
-      <h4>All groups and events ({content.length})</h4>
+      <h4>All content ({content.length})</h4>
       {content.map((c) => (
         <div key={`${c.type}-${c.id}`} className="row" style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ flex: 1 }}>

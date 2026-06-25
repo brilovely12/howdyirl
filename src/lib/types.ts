@@ -59,6 +59,24 @@ export type Thread = {
   updated_at: string;
 };
 
+export type Spot = {
+  id: string;
+  creator_id: string | null;
+  creator_handle: string | null;
+  name: string;
+  description: string;
+  address: string;
+  claimed: boolean;
+  joins_count: number;
+  external_link: string | null;
+  link_label: string | null;
+  image_url: string | null;
+  images: string[];
+  tags: string[];
+  status: string;
+  updated_at: string;
+};
+
 export type Tag = { id: string; name: string; sort: number };
 
 export type ForumSection = {

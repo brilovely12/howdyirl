@@ -69,7 +69,7 @@ export type AdminForumSection = {
 
 export type AdminContent = {
   id: string;
-  type: "group" | "event";
+  type: "group" | "event" | "spot";
   name: string;
   status: string;
   creator_handle: string | null;
@@ -80,10 +80,11 @@ export type AdminContent = {
 
 export async function getAdminStats() {
   const db = howdyDb();
-  const [members, groups, events, openReports, openClaims, comments] = await Promise.all([
+  const [members, groups, events, spots, openReports, openClaims, comments] = await Promise.all([
     db.from("members").select("id", { count: "exact", head: true }),
     db.from("groups").select("id", { count: "exact", head: true }).eq("status", "live"),
     db.from("events").select("id", { count: "exact", head: true }).eq("status", "live"),
+    db.from("spots").select("id", { count: "exact", head: true }).eq("status", "live"),
     db.from("reports").select("id", { count: "exact", head: true }).eq("status", "open"),
     db.from("claim_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
     db.from("comments").select("id", { count: "exact", head: true }),
@@ -92,6 +93,7 @@ export async function getAdminStats() {
     members: members.count ?? 0,
     groups: groups.count ?? 0,
     events: events.count ?? 0,
+    spots: spots.count ?? 0,
     openReports: openReports.count ?? 0,
     openClaims: openClaims.count ?? 0,
     comments: comments.count ?? 0,
@@ -171,17 +173,19 @@ export async function getRecentComments(): Promise<AdminComment[]> {
   return comments;
 }
 
-// --- Content (groups + events) ---
+// --- Content (groups + events + spots) ---
 
 export async function getAdminContent(): Promise<AdminContent[]> {
   const db = howdyDb();
-  const [{ data: groups }, { data: events }] = await Promise.all([
+  const [{ data: groups }, { data: events }, { data: spots }] = await Promise.all([
     db.from("groups").select("id, name, status, creator_handle, created_at").order("created_at", { ascending: false }).limit(50),
     db.from("events").select("id, name, status, creator_handle, created_at").order("created_at", { ascending: false }).limit(50),
+    db.from("spots").select("id, name, status, creator_handle, created_at").order("created_at", { ascending: false }).limit(50),
   ]);
   const content: AdminContent[] = [
     ...((groups ?? []) as any[]).map((g: any) => ({ ...g, type: "group" as const })),
     ...((events ?? []) as any[]).map((e: any) => ({ ...e, type: "event" as const })),
+    ...((spots ?? []) as any[]).map((s: any) => ({ ...s, type: "spot" as const })),
   ];
   content.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   return content;
@@ -204,6 +208,17 @@ export async function getAdminTags(): Promise<AdminTag[]> {
   const db = howdyDb();
   const { data } = await db
     .from("tags")
+    .select("id, name, sort")
+    .order("sort");
+  return (data ?? []) as AdminTag[];
+}
+
+// --- Spot Tags ---
+
+export async function getAdminSpotTags(): Promise<AdminTag[]> {
+  const db = howdyDb();
+  const { data } = await db
+    .from("spot_tags")
     .select("id, name, sort")
     .order("sort");
   return (data ?? []) as AdminTag[];

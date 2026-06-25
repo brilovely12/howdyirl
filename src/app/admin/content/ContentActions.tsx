@@ -8,7 +8,7 @@ export default function ContentActions({
   id,
   currentStatus,
 }: {
-  type: "group" | "event";
+  type: "group" | "event" | "spot";
   id: string;
   currentStatus: string;
 }) {

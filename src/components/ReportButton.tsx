@@ -7,7 +7,7 @@ export default function ReportButton({
   targetType,
   targetId,
 }: {
-  targetType: "group" | "event";
+  targetType: "group" | "event" | "spot";
   targetId: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -20,7 +20,7 @@ export default function ReportButton({
   if (!open) {
     return (
       <button className="report" onClick={() => setOpen(true)} style={{ background: "none", border: "none", font: "inherit", cursor: "pointer", padding: 0 }}>
-        Report this {targetType === "group" ? "listing" : "event"}
+        Report this {targetType === "group" ? "listing" : targetType === "spot" ? "spot" : "event"}
       </button>
     );
   }

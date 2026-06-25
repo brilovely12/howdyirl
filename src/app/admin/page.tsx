@@ -13,6 +13,7 @@ export default async function AdminDashboard() {
           { label: "Members", n: stats.members, href: "/admin/members" },
           { label: "Groups", n: stats.groups, href: "/admin/content" },
           { label: "Events", n: stats.events, href: "/admin/content" },
+          { label: "Spots", n: stats.spots, href: "/admin/content" },
           { label: "Comments", n: stats.comments, href: "/admin/comments" },
           { label: "Open reports", n: stats.openReports, href: "/admin/reports", warn: true },
           { label: "Pending claims", n: stats.openClaims, href: "/admin/reports", warn: true },

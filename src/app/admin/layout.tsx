@@ -12,6 +12,7 @@ const tabs = [
   { href: "/admin/comments", label: "Comments" },
   { href: "/admin/pages", label: "Pages" },
   { href: "/admin/tags", label: "Tags" },
+  { href: "/admin/spot-tags", label: "Spot Tags" },
   { href: "/admin/forums", label: "Forums" },
 ];
 

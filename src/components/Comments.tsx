@@ -16,7 +16,7 @@ export default function Comments({
 }: {
   comments: Comment[];
   loggedIn: boolean;
-  targetType: "group" | "event" | "thread";
+  targetType: "group" | "event" | "thread" | "spot";
   targetId: string;
   sessionHandle?: string | null;
   isAdmin?: boolean;

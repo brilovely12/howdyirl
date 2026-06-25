@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { howdyDb } from "./supabase";
-import type { Group, EventRow, Update, Comment, Tag, Thread, Page, Notification, ForumSection, SearchResult } from "./types";
+import type { Group, EventRow, Spot, Update, Comment, Tag, Thread, Page, Notification, ForumSection, SearchResult } from "./types";
 
 export const PAGE_SIZE = 10;
 
@@ -35,10 +35,18 @@ export const listTags = cache(async (): Promise<Tag[]> => {
   return data ?? [];
 });
 
+export const listSpotTags = cache(async (): Promise<Tag[]> => {
+  const db = howdyDb();
+  const { data } = await db.from("spot_tags").select("id,name,sort").order("name");
+  return data ?? [];
+});
+
 const GROUP_COLS =
   "id,creator_id,creator_handle,name,description,claimed,joins_count,external_link,link_label,image_url,images,tags,status,updated_at";
 const EVENT_COLS =
   "id,creator_id,creator_handle,host_group_id,host_group_name,name,description,starts_at,recurrence,recurrence_end,external_link,image_url,images,tags,status";
+const SPOT_COLS =
+  "id,creator_id,creator_handle,name,description,address,claimed,joins_count,external_link,link_label,image_url,images,tags,status,updated_at";
 
 export type ListParams = { q?: string; tags?: string[]; page?: number; when?: string };
 
@@ -154,11 +162,11 @@ export async function searchEvents({ q, tags, when, page = 1 }: ListParams): Pro
 }
 
 /** Live counts for the subnav tabs. */
-export const listCounts = cache(async (): Promise<{ groups: number; events: number }> => {
+export const listCounts = cache(async (): Promise<{ groups: number; events: number; spots: number }> => {
   const cityId = await getCityId();
-  if (!cityId) return { groups: 0, events: 0 };
+  if (!cityId) return { groups: 0, events: 0, spots: 0 };
   const db = howdyDb();
-  const [g, e] = await Promise.all([
+  const [g, e, s] = await Promise.all([
     db.from("groups").select("id", { count: "exact", head: true }).eq("city_id", cityId).eq("status", "live"),
     db
       .from("events")
@@ -166,9 +174,84 @@ export const listCounts = cache(async (): Promise<{ groups: number; events: numb
       .eq("city_id", cityId)
       .eq("status", "live")
       .or(`starts_at.gte.${new Date().toISOString()},recurrence.not.is.null`),
+    db.from("spots").select("id", { count: "exact", head: true }).eq("city_id", cityId).eq("status", "live"),
   ]);
-  return { groups: g.count ?? 0, events: e.count ?? 0 };
+  return { groups: g.count ?? 0, events: e.count ?? 0, spots: s.count ?? 0 };
 });
+
+// --- Spots ---
+
+export async function searchSpots({ q, tags, page = 1 }: ListParams): Promise<SearchResult<Spot>> {
+  const cityId = await getCityId();
+  if (!cityId) return { rows: [], total: 0 };
+
+  const db = howdyDb();
+  let query = db
+    .from("spots")
+    .select(SPOT_COLS, { count: "exact" })
+    .eq("city_id", cityId)
+    .eq("status", "live");
+
+  if (tags?.length) query = query.contains("tags", tags);
+  for (const term of queryTerms(q)) query = query.ilike("search_text", likePattern(term));
+
+  const from = (page - 1) * PAGE_SIZE;
+  query = query.order("updated_at", { ascending: false }).range(from, from + PAGE_SIZE - 1);
+
+  const { data, count } = await query;
+  return { rows: (data ?? []) as Spot[], total: count ?? 0 };
+}
+
+export async function getSpot(id: string, anyStatus = false): Promise<Spot | null> {
+  const db = howdyDb();
+  let query = db.from("spots").select(SPOT_COLS).eq("id", id);
+  if (!anyStatus) query = query.eq("status", "live");
+  const { data } = await query.maybeSingle();
+  return (data as Spot) ?? null;
+}
+
+export async function getSpotUpdates(spotId: string): Promise<Update[]> {
+  const db = howdyDb();
+  const { data } = await db
+    .from("spot_updates")
+    .select("id,body,posted_at")
+    .eq("spot_id", spotId)
+    .order("posted_at", { ascending: false });
+  return data ?? [];
+}
+
+export async function getSpotEvents(hostSpotId: string): Promise<EventRow[]> {
+  const db = howdyDb();
+  const { data } = await db
+    .from("events")
+    .select(EVENT_COLS)
+    .eq("host_spot_id", hostSpotId)
+    .eq("status", "live")
+    .gte("starts_at", new Date().toISOString())
+    .order("starts_at", { ascending: true });
+  return (data ?? []) as EventRow[];
+}
+
+export async function isMemberOfSpot(memberId: string, spotId: string): Promise<boolean> {
+  const db = howdyDb();
+  const { data } = await db
+    .from("spot_memberships")
+    .select("member_id")
+    .eq("member_id", memberId)
+    .eq("spot_id", spotId)
+    .maybeSingle();
+  return !!data;
+}
+
+export async function getMySpots(memberId: string): Promise<{ id: string; name: string }[]> {
+  const db = howdyDb();
+  const { data } = await db
+    .from("spot_memberships")
+    .select("spot_id, spots:spot_id(id, name)")
+    .eq("member_id", memberId)
+    .order("created_at", { ascending: false });
+  return (data ?? []).map((r: any) => r.spots).filter(Boolean);
+}
 
 export async function getGroup(id: string, anyStatus = false): Promise<Group | null> {
   const db = howdyDb();
@@ -234,7 +317,7 @@ export async function getGroupsByCreator(memberId: string): Promise<{ id: string
   return data ?? [];
 }
 
-export async function getComments(targetType: "group" | "event" | "thread", targetId: string): Promise<Comment[]> {
+export async function getComments(targetType: "group" | "event" | "thread" | "spot", targetId: string): Promise<Comment[]> {
   const db = howdyDb();
   const { data } = await db
     .from("comments")
