@@ -1,13 +1,14 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Spot } from "@/lib/types";
 import { color, initials, relTime } from "@/lib/format";
 import CheckBadge from "./CheckBadge";
 
-export default function SpotRow({ spot, index }: { spot: Spot; index: number }) {
+export default function SpotRow({ spot, index, city }: { spot: Spot; index: number; city: string }) {
   return (
-    <Link href={`/spots/${spot.id}`} className="row">
+    <Link href={`/${city}/spots/${spot.slug}`} className="row">
       {spot.image_url ? (
-        <img className="thumb" src={spot.image_url} alt="" style={{ objectFit: "cover" }} />
+        <Image className="thumb" src={spot.image_url} alt={spot.name} width={64} height={64} style={{ objectFit: "cover" }} />
       ) : (
         <div className="thumb" style={{ background: color(index) }}>
           {initials(spot.name)}

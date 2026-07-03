@@ -1,13 +1,14 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Group } from "@/lib/types";
 import { color, initials, relTime } from "@/lib/format";
 import CheckBadge from "./CheckBadge";
 
-export default function GroupRow({ group, index }: { group: Group; index: number }) {
+export default function GroupRow({ group, index, city }: { group: Group; index: number; city: string }) {
   return (
-    <Link href={`/groups/${group.id}`} className="row">
+    <Link href={`/${city}/groups/${group.slug}`} className="row">
       {group.image_url ? (
-        <img className="thumb" src={group.image_url} alt="" style={{ objectFit: "cover" }} />
+        <Image className="thumb" src={group.image_url} alt={group.name} width={64} height={64} style={{ objectFit: "cover" }} />
       ) : (
         <div className="thumb" style={{ background: color(index) }}>
           {initials(group.name)}

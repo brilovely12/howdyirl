@@ -1,24 +1,18 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSessionUser } from "@/lib/auth";
-import { getNotifications } from "@/lib/data";
+import { getNotifications, resolveNotifSlugs } from "@/lib/data";
 import { stamp } from "@/lib/format";
 import MarkRead from "./MarkRead";
 
 export const dynamic = "force-dynamic";
-
-function notifLink(n: { link_type: string | null; link_id: string | null }): string | null {
-  if (!n.link_type || !n.link_id) return null;
-  if (n.link_type === "group") return `/groups/${n.link_id}`;
-  if (n.link_type === "event") return `/events/${n.link_id}`;
-  return null;
-}
 
 export default async function NotificationsPage() {
   const session = await getSessionUser();
   if (!session?.member) redirect("/login");
 
   const notifications = await getNotifications(session.member.id);
+  const slugMap = await resolveNotifSlugs(notifications);
 
   return (
     <div style={{ maxWidth: 640, margin: "0 auto" }}>
@@ -29,7 +23,9 @@ export default async function NotificationsPage() {
       ) : (
         <div className="list">
           {notifications.map((n) => {
-            const href = notifLink(n);
+            const href = n.link_type && n.link_id && slugMap[n.link_id]
+              ? `/huntsville/${n.link_type}s/${slugMap[n.link_id]}`
+              : null;
             return (
               <div key={n.id} className={`row notif${n.read ? "" : " unread"}`}>
                 <div style={{ flex: 1 }}>

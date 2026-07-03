@@ -20,7 +20,7 @@ export default async function ReportsPage() {
           openReports.map((r) => (
             <div key={r.id} className="row" style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <div style={{ flex: 1 }}>
-                <Link href={`/${r.target_type}s/${r.target_id}`}>{r.target_name}</Link>
+                <Link href={`/huntsville/${r.target_type}s/${r.target_id}`}>{r.target_name}</Link>
                 <span style={{ color: "var(--ink-faint)", fontSize: 12 }}>
                   {" "}({r.target_type} · {r.target_status})
                 </span>
@@ -46,7 +46,7 @@ export default async function ReportsPage() {
           pendingClaims.map((c) => (
             <div key={c.id} className="row" style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <div style={{ flex: 1 }}>
-                <Link href={`/groups/${c.group_id}`}>{c.group_name}</Link>
+                <Link href={`/huntsville/groups/${c.group_slug}`}>{c.group_name}</Link>
                 {c.note && <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>{c.note}</div>}
                 <div className="meta">by @{c.requested_by} · {c.contact_email} · {stamp(c.created_at)}</div>
               </div>

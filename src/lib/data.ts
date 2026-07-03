@@ -42,11 +42,11 @@ export const listSpotTags = cache(async (): Promise<Tag[]> => {
 });
 
 const GROUP_COLS =
-  "id,creator_id,creator_handle,name,description,claimed,joins_count,external_link,link_label,image_url,images,tags,status,updated_at";
+  "id,slug,creator_id,creator_handle,name,description,claimed,joins_count,external_link,link_label,image_url,images,tags,status,updated_at";
 const EVENT_COLS =
-  "id,creator_id,creator_handle,host_group_id,host_group_name,name,description,starts_at,recurrence,recurrence_end,external_link,image_url,images,tags,status";
+  "id,slug,creator_id,creator_handle,host_group_id,host_group_name,host_group_slug,name,description,starts_at,recurrence,recurrence_end,external_link,image_url,images,tags,status";
 const SPOT_COLS =
-  "id,creator_id,creator_handle,name,description,address,claimed,joins_count,external_link,link_label,image_url,images,tags,status,updated_at";
+  "id,slug,creator_id,creator_handle,name,description,address,claimed,joins_count,external_link,link_label,image_url,images,tags,status,updated_at";
 
 export type ListParams = { q?: string; tags?: string[]; page?: number; when?: string };
 
@@ -202,9 +202,9 @@ export async function searchSpots({ q, tags, page = 1 }: ListParams): Promise<Se
   return { rows: (data ?? []) as Spot[], total: count ?? 0 };
 }
 
-export async function getSpot(id: string, anyStatus = false): Promise<Spot | null> {
+export async function getSpot(slug: string, anyStatus = false): Promise<Spot | null> {
   const db = howdyDb();
-  let query = db.from("spots").select(SPOT_COLS).eq("id", id);
+  let query = db.from("spots").select(SPOT_COLS).eq("slug", slug);
   if (!anyStatus) query = query.eq("status", "live");
   const { data } = await query.maybeSingle();
   return (data as Spot) ?? null;
@@ -243,27 +243,27 @@ export async function isMemberOfSpot(memberId: string, spotId: string): Promise<
   return !!data;
 }
 
-export async function getMySpots(memberId: string): Promise<{ id: string; name: string }[]> {
+export async function getMySpots(memberId: string): Promise<{ id: string; slug: string; name: string }[]> {
   const db = howdyDb();
   const { data } = await db
     .from("spot_memberships")
-    .select("spot_id, spots:spot_id(id, name)")
+    .select("spot_id, spots:spot_id(id, slug, name)")
     .eq("member_id", memberId)
     .order("created_at", { ascending: false });
   return (data ?? []).map((r: any) => r.spots).filter(Boolean);
 }
 
-export async function getGroup(id: string, anyStatus = false): Promise<Group | null> {
+export async function getGroup(slug: string, anyStatus = false): Promise<Group | null> {
   const db = howdyDb();
-  let query = db.from("groups").select(GROUP_COLS).eq("id", id);
+  let query = db.from("groups").select(GROUP_COLS).eq("slug", slug);
   if (!anyStatus) query = query.eq("status", "live");
   const { data } = await query.maybeSingle();
   return (data as Group) ?? null;
 }
 
-export async function getEvent(id: string, anyStatus = false): Promise<EventRow | null> {
+export async function getEvent(slug: string, anyStatus = false): Promise<EventRow | null> {
   const db = howdyDb();
-  let query = db.from("events").select(EVENT_COLS).eq("id", id);
+  let query = db.from("events").select(EVENT_COLS).eq("slug", slug);
   if (!anyStatus) query = query.eq("status", "live");
   const { data } = await query.maybeSingle();
   if (!data) return null;
@@ -306,11 +306,11 @@ export async function getGroupEvents(hostGroupId: string): Promise<EventRow[]> {
 }
 
 /** Live groups created by a member — for the event "post on behalf of" picker. */
-export async function getGroupsByCreator(memberId: string): Promise<{ id: string; name: string }[]> {
+export async function getGroupsByCreator(memberId: string): Promise<{ id: string; slug: string; name: string }[]> {
   const db = howdyDb();
   const { data } = await db
     .from("groups")
-    .select("id,name")
+    .select("id,slug,name")
     .eq("creator_id", memberId)
     .eq("status", "live")
     .order("name");
@@ -328,7 +328,7 @@ export async function getComments(targetType: "group" | "event" | "thread" | "sp
   return data ?? [];
 }
 
-const THREAD_COLS = "id,creator_id,creator_handle,section,title,body,status,reply_count,created_at,updated_at";
+const THREAD_COLS = "id,slug,creator_id,creator_handle,section,title,body,status,reply_count,created_at,updated_at";
 
 export async function getForumSections(): Promise<ForumSection[]> {
   const db = howdyDb();
@@ -355,9 +355,9 @@ export async function listThreads(section: string, page = 1): Promise<SearchResu
   return { rows: (data ?? []) as Thread[], total: count ?? 0 };
 }
 
-export async function getThread(id: string, anyStatus = false): Promise<Thread | null> {
+export async function getThread(slug: string, anyStatus = false): Promise<Thread | null> {
   const db = howdyDb();
-  let query = db.from("threads").select(THREAD_COLS).eq("id", id);
+  let query = db.from("threads").select(THREAD_COLS).eq("slug", slug);
   if (!anyStatus) query = query.eq("status", "live");
   const { data } = await query.maybeSingle();
   return (data as Thread) ?? null;
@@ -424,21 +424,21 @@ export async function hasRsvp(memberId: string, eventId: string): Promise<boolea
   return !!data;
 }
 
-export async function getMyGroups(memberId: string): Promise<{ id: string; name: string }[]> {
+export async function getMyGroups(memberId: string): Promise<{ id: string; slug: string; name: string }[]> {
   const db = howdyDb();
   const { data } = await db
     .from("memberships")
-    .select("group_id, groups:group_id(id, name)")
+    .select("group_id, groups:group_id(id, slug, name)")
     .eq("member_id", memberId)
     .order("created_at", { ascending: false });
   return (data ?? []).map((r: any) => r.groups).filter(Boolean);
 }
 
-export async function getMyRsvps(memberId: string): Promise<{ id: string; name: string; starts_at: string }[]> {
+export async function getMyRsvps(memberId: string): Promise<{ id: string; slug: string; name: string; starts_at: string }[]> {
   const db = howdyDb();
   const { data } = await db
     .from("rsvps")
-    .select("event_id, events:event_id(id, name, starts_at)")
+    .select("event_id, events:event_id(id, slug, name, starts_at)")
     .eq("member_id", memberId)
     .order("created_at", { ascending: false });
   return (data ?? []).map((r: any) => r.events).filter(Boolean);
@@ -463,4 +463,25 @@ export async function getNotifications(memberId: string): Promise<Notification[]
     .order("created_at", { ascending: false })
     .limit(50);
   return (data ?? []) as Notification[];
+}
+
+export async function resolveNotifSlugs(notifs: Notification[]): Promise<Record<string, string>> {
+  const db = howdyDb();
+  const groupIds = notifs.filter((n) => n.link_type === "group" && n.link_id).map((n) => n.link_id!);
+  const eventIds = notifs.filter((n) => n.link_type === "event" && n.link_id).map((n) => n.link_id!);
+  const spotIds = notifs.filter((n) => n.link_type === "spot" && n.link_id).map((n) => n.link_id!);
+  const map: Record<string, string> = {};
+  if (groupIds.length) {
+    const { data } = await db.from("groups").select("id,slug").in("id", groupIds);
+    (data ?? []).forEach((r: any) => { map[r.id] = r.slug; });
+  }
+  if (eventIds.length) {
+    const { data } = await db.from("events").select("id,slug").in("id", eventIds);
+    (data ?? []).forEach((r: any) => { map[r.id] = r.slug; });
+  }
+  if (spotIds.length) {
+    const { data } = await db.from("spots").select("id,slug").in("id", spotIds);
+    (data ?? []).forEach((r: any) => { map[r.id] = r.slug; });
+  }
+  return map;
 }

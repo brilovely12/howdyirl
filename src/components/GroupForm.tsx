@@ -9,6 +9,7 @@ import ImagePicker from "./ImagePicker";
 
 type Existing = {
   id: string;
+  slug: string;
   name: string;
   description: string;
   tags: string[];
@@ -18,7 +19,7 @@ type Existing = {
   images: string[];
 };
 
-export default function GroupForm({ tags, existing }: { tags: Tag[]; existing?: Existing }) {
+export default function GroupForm({ tags, existing, city }: { tags: Tag[]; existing?: Existing; city: string }) {
   const supabase = getBrowserClient();
   const editing = !!existing;
   const [name, setName] = useState(existing?.name ?? "");
@@ -48,7 +49,7 @@ export default function GroupForm({ tags, existing }: { tags: Tag[]; existing?: 
           name, description, tags: selected, external_link: externalLink, link_label: linkLabel,
           image_url: imageUrl, images,
         });
-        window.location.assign(`/groups/${existing!.id}`);
+        window.location.assign(`/${city}/groups/${existing!.slug}`);
       });
       return;
     }
@@ -74,7 +75,7 @@ export default function GroupForm({ tags, existing }: { tags: Tag[]; existing?: 
       });
     }
     setBusy(false);
-    window.location.assign(`/groups/${data}`);
+    window.location.assign(`/${city}/groups/${data}`);
   }
 
   const loading = busy || pending;

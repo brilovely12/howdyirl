@@ -1,5 +1,6 @@
 export type Group = {
   id: string;
+  slug: string;
   creator_id: string | null;
   creator_handle: string | null;
   name: string;
@@ -17,10 +18,12 @@ export type Group = {
 
 export type EventRow = {
   id: string;
+  slug: string;
   creator_id: string | null;
   creator_handle: string | null;
   host_group_id: string | null;
   host_group_name: string | null;
+  host_group_slug: string | null;
   name: string;
   description: string;
   starts_at: string;
@@ -48,6 +51,7 @@ export type Comment = {
 
 export type Thread = {
   id: string;
+  slug: string;
   creator_id: string | null;
   creator_handle: string;
   section: string;
@@ -61,6 +65,7 @@ export type Thread = {
 
 export type Spot = {
   id: string;
+  slug: string;
   creator_id: string | null;
   creator_handle: string | null;
   name: string;

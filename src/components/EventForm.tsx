@@ -9,6 +9,7 @@ import ImagePicker from "./ImagePicker";
 
 type Existing = {
   id: string;
+  slug: string;
   name: string;
   description: string;
   tags: string[];
@@ -26,11 +27,13 @@ export default function EventForm({
   myGroups,
   myHandle,
   existing,
+  city,
 }: {
   tags: Tag[];
   myGroups: { id: string; name: string }[];
   myHandle: string;
   existing?: Existing;
+  city: string;
 }) {
   const supabase = getBrowserClient();
   const editing = !!existing;
@@ -75,7 +78,7 @@ export default function EventForm({
           recurrence_end: recurrenceEnd ? `${recurrenceEnd}T23:59` : null,
           image_url: imageUrl, images,
         });
-        window.location.assign(`/events/${existing!.id}`);
+        window.location.assign(`/${city}/events/${existing!.slug}`);
       });
       return;
     }
@@ -110,7 +113,7 @@ export default function EventForm({
       });
     }
     setBusy(false);
-    window.location.assign(`/events/${data}`);
+    window.location.assign(`/${city}/events/${data}`);
   }
 
   const loading = busy || pending;

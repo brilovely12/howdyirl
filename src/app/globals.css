@@ -93,7 +93,7 @@ main{padding:18px 0 60px;flex:1}
 
 /* Section header bars (phpBB style) */
 .listhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:0;background:var(--panel-2);border:1px solid var(--rule);padding:7px 11px;gap:4px 8px;position:relative}
-.listhead h2{font-size:13px;margin:0;font-family:var(--sans);font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.8px}
+.listhead h1,.listhead h2{font-size:13px;margin:0;font-family:var(--sans);font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.8px}
 .listhead .sort{font-size:11px;color:var(--ink-faint);font-family:var(--sans);display:flex;align-items:center}
 .filter-toggle{display:none;background:none;border:1px solid var(--rule);border-radius:3px;padding:3px 7px;cursor:pointer;color:var(--ink-dim);position:relative;line-height:1}
 .filter-toggle svg{display:block}

@@ -21,6 +21,7 @@ export type ClaimRequest = {
   status: string;
   created_at: string;
   group_name?: string;
+  group_slug?: string;
 };
 
 export type AdminMember = {
@@ -69,6 +70,7 @@ export type AdminForumSection = {
 
 export type AdminContent = {
   id: string;
+  slug: string;
   type: "group" | "event" | "spot";
   name: string;
   status: string;
@@ -132,8 +134,9 @@ export async function getClaims(): Promise<ClaimRequest[]> {
 
   const claims = (data ?? []) as ClaimRequest[];
   for (const c of claims) {
-    const { data: group } = await db.from("groups").select("name").eq("id", c.group_id).maybeSingle();
+    const { data: group } = await db.from("groups").select("name,slug").eq("id", c.group_id).maybeSingle();
     c.group_name = (group as any)?.name ?? "Unknown";
+    c.group_slug = (group as any)?.slug ?? c.group_id;
   }
   return claims;
 }
@@ -178,9 +181,9 @@ export async function getRecentComments(): Promise<AdminComment[]> {
 export async function getAdminContent(): Promise<AdminContent[]> {
   const db = howdyDb();
   const [{ data: groups }, { data: events }, { data: spots }] = await Promise.all([
-    db.from("groups").select("id, name, status, creator_handle, created_at").order("created_at", { ascending: false }).limit(50),
-    db.from("events").select("id, name, status, creator_handle, created_at").order("created_at", { ascending: false }).limit(50),
-    db.from("spots").select("id, name, status, creator_handle, created_at").order("created_at", { ascending: false }).limit(50),
+    db.from("groups").select("id, slug, name, status, creator_handle, created_at").order("created_at", { ascending: false }).limit(50),
+    db.from("events").select("id, slug, name, status, creator_handle, created_at").order("created_at", { ascending: false }).limit(50),
+    db.from("spots").select("id, slug, name, status, creator_handle, created_at").order("created_at", { ascending: false }).limit(50),
   ]);
   const content: AdminContent[] = [
     ...((groups ?? []) as any[]).map((g: any) => ({ ...g, type: "group" as const })),
@@ -241,8 +244,8 @@ export async function getRecentActivity() {
   const db = howdyDb();
   const [{ data: newMembers }, { data: newGroups }, { data: newEvents }, { data: newComments }] = await Promise.all([
     db.from("members").select("handle, joined_at").order("joined_at", { ascending: false }).limit(10),
-    db.from("groups").select("id, name, created_at").order("created_at", { ascending: false }).limit(10),
-    db.from("events").select("id, name, created_at").order("created_at", { ascending: false }).limit(10),
+    db.from("groups").select("id, slug, name, created_at").order("created_at", { ascending: false }).limit(10),
+    db.from("events").select("id, slug, name, created_at").order("created_at", { ascending: false }).limit(10),
     db.from("comments").select("author_handle, target_type, target_id, created_at").order("created_at", { ascending: false }).limit(10),
   ]);
 
@@ -253,16 +256,16 @@ export async function getRecentActivity() {
     feed.push({ kind: "signup", label: `@${m.handle} joined`, at: m.joined_at });
   }
   for (const g of (newGroups ?? []) as any[]) {
-    feed.push({ kind: "group", label: `New group: ${g.name}`, href: `/groups/${g.id}`, at: g.created_at });
+    feed.push({ kind: "group", label: `New group: ${g.name}`, href: `/huntsville/groups/${g.slug}`, at: g.created_at });
   }
   for (const e of (newEvents ?? []) as any[]) {
-    feed.push({ kind: "event", label: `New event: ${e.name}`, href: `/events/${e.id}`, at: e.created_at });
+    feed.push({ kind: "event", label: `New event: ${e.name}`, href: `/huntsville/events/${e.slug}`, at: e.created_at });
   }
   for (const c of (newComments ?? []) as any[]) {
     feed.push({
       kind: "comment",
       label: `@${c.author_handle} commented`,
-      href: `/${c.target_type}s/${c.target_id}`,
+      href: `/huntsville/${c.target_type}s/${c.target_id}`,
       at: c.created_at,
     });
   }

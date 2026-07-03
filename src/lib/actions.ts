@@ -24,7 +24,7 @@ export async function joinGroup(groupId: string) {
     { onConflict: "member_id,group_id" },
   );
   if (error) throw new Error(error.message);
-  revalidatePath(`/groups/${groupId}`);
+  revalidatePath(`/huntsville/groups/${groupId}`);
   revalidatePath("/me");
 }
 
@@ -37,7 +37,7 @@ export async function leaveGroup(groupId: string) {
     .eq("member_id", member.id)
     .eq("group_id", groupId);
   if (error) throw new Error(error.message);
-  revalidatePath(`/groups/${groupId}`);
+  revalidatePath(`/huntsville/groups/${groupId}`);
   revalidatePath("/me");
 }
 
@@ -49,7 +49,7 @@ export async function rsvpEvent(eventId: string) {
     { onConflict: "member_id,event_id" },
   );
   if (error) throw new Error(error.message);
-  revalidatePath(`/events/${eventId}`);
+  revalidatePath(`/huntsville/events/${eventId}`);
   revalidatePath("/me");
 }
 
@@ -62,12 +62,12 @@ export async function cancelRsvp(eventId: string) {
     .eq("member_id", member.id)
     .eq("event_id", eventId);
   if (error) throw new Error(error.message);
-  revalidatePath(`/events/${eventId}`);
+  revalidatePath(`/huntsville/events/${eventId}`);
   revalidatePath("/me");
 }
 
 export async function updateGroup(
-  groupId: string,
+  idOrSlug: string,
   fields: { name: string; description: string; tags: string[]; external_link: string; link_label: string; image_url?: string | null; images?: string[] },
 ) {
   await requireMember();
@@ -82,14 +82,14 @@ export async function updateGroup(
   };
   if (fields.image_url !== undefined) row.image_url = fields.image_url;
   if (fields.images !== undefined) row.images = fields.images;
-  const { error } = await supabase.from("groups").update(row).eq("id", groupId);
+  const col = idOrSlug.includes("-") && idOrSlug.length === 36 ? "id" : "slug";
+  const { error } = await supabase.from("groups").update(row).eq(col, idOrSlug);
   if (error) throw new Error(error.message);
-  revalidatePath(`/groups/${groupId}`);
-  revalidatePath("/groups");
+  revalidatePath("/huntsville/groups");
 }
 
 export async function updateEvent(
-  eventId: string,
+  idOrSlug: string,
   fields: { name: string; description: string; tags: string[]; starts_at: string; external_link: string; recurrence?: string | null; recurrence_end?: string | null; image_url?: string | null; images?: string[] },
 ) {
   await requireMember();
@@ -106,10 +106,10 @@ export async function updateEvent(
   if (fields.recurrence_end !== undefined) row.recurrence_end = fields.recurrence_end || null;
   if (fields.image_url !== undefined) row.image_url = fields.image_url;
   if (fields.images !== undefined) row.images = fields.images;
-  const { error } = await supabase.from("events").update(row).eq("id", eventId);
+  const col = idOrSlug.includes("-") && idOrSlug.length === 36 ? "id" : "slug";
+  const { error } = await supabase.from("events").update(row).eq(col, idOrSlug);
   if (error) throw new Error(error.message);
-  revalidatePath(`/events/${eventId}`);
-  revalidatePath("/events");
+  revalidatePath("/huntsville/events");
 }
 
 export async function postComment(targetType: "group" | "event" | "thread" | "spot", targetId: string, body: string) {
@@ -127,9 +127,9 @@ export async function postComment(targetType: "group" | "event" | "thread" | "sp
   if (error) throw new Error(error.message);
   if (targetType === "thread") {
     await supabase.rpc("increment_reply_count", { p_thread_id: targetId });
-    revalidatePath(`/forums`);
+    revalidatePath(`/huntsville/forums`);
   }
-  revalidatePath(`/${targetType}s/${targetId}`);
+  revalidatePath(`/huntsville/${targetType}s/${targetId}`);
 }
 
 export async function submitReport(targetType: "group" | "event" | "spot", targetId: string, reason: string) {
@@ -184,7 +184,7 @@ export async function resolveReportAndHide(reportId: string, targetType: string,
   const { error: e2 } = await supabase.from(table).update({ status: "hidden" }).eq("id", targetId);
   if (e2) throw new Error(e2.message);
   revalidatePath("/admin");
-  revalidatePath(`/${targetType}s/${targetId}`);
+  revalidatePath(`/huntsville/${targetType}s/${targetId}`);
 }
 
 export async function decideClaim(claimId: string, groupId: string, approve: boolean) {
@@ -200,7 +200,7 @@ export async function decideClaim(claimId: string, groupId: string, approve: boo
     if (e2) throw new Error(e2.message);
   }
   revalidatePath("/admin");
-  revalidatePath(`/groups/${groupId}`);
+  revalidatePath(`/huntsville/groups/${groupId}`);
 }
 
 // --- Content moderation ---
@@ -213,10 +213,10 @@ export async function setContentStatus(type: "group" | "event" | "thread" | "spo
   if (error) throw new Error(error.message);
   revalidatePath("/admin");
   if (type === "thread") {
-    revalidatePath(`/forums`);
+    revalidatePath(`/huntsville/forums`);
   } else {
-    revalidatePath(`/${type}s/${id}`);
-    revalidatePath(`/${type}s`);
+    revalidatePath(`/huntsville/${type}s/${id}`);
+    revalidatePath(`/huntsville/${type}s`);
   }
 }
 
@@ -225,7 +225,7 @@ export async function deleteThread(threadId: string) {
   const supabase = await getServerClient();
   const { error } = await supabase.from("threads").delete().eq("id", threadId);
   if (error) throw new Error(error.message);
-  revalidatePath("/forums");
+  revalidatePath("/huntsville/forums");
 }
 
 export async function deleteComment(commentId: string, targetType?: string, targetId?: string) {
@@ -233,7 +233,7 @@ export async function deleteComment(commentId: string, targetType?: string, targ
   const supabase = await getServerClient();
   const { error } = await supabase.from("comments").delete().eq("id", commentId);
   if (error) throw new Error(error.message);
-  if (targetType && targetId) revalidatePath(`/${targetType}s/${targetId}`);
+  if (targetType && targetId) revalidatePath(`/huntsville/${targetType}s/${targetId}`);
   revalidatePath("/admin");
 }
 
@@ -289,7 +289,7 @@ export async function joinSpot(spotId: string) {
     { onConflict: "member_id,spot_id" },
   );
   if (error) throw new Error(error.message);
-  revalidatePath(`/spots/${spotId}`);
+  revalidatePath(`/huntsville/spots/${spotId}`);
   revalidatePath("/me");
 }
 
@@ -302,12 +302,12 @@ export async function leaveSpot(spotId: string) {
     .eq("member_id", member.id)
     .eq("spot_id", spotId);
   if (error) throw new Error(error.message);
-  revalidatePath(`/spots/${spotId}`);
+  revalidatePath(`/huntsville/spots/${spotId}`);
   revalidatePath("/me");
 }
 
 export async function updateSpot(
-  spotId: string,
+  idOrSlug: string,
   fields: { name: string; description: string; address: string; tags: string[]; external_link: string; link_label: string; image_url?: string | null; images?: string[] },
 ) {
   await requireMember();
@@ -323,10 +323,10 @@ export async function updateSpot(
   };
   if (fields.image_url !== undefined) row.image_url = fields.image_url;
   if (fields.images !== undefined) row.images = fields.images;
-  const { error } = await supabase.from("spots").update(row).eq("id", spotId);
+  const col = idOrSlug.includes("-") && idOrSlug.length === 36 ? "id" : "slug";
+  const { error } = await supabase.from("spots").update(row).eq(col, idOrSlug);
   if (error) throw new Error(error.message);
-  revalidatePath(`/spots/${spotId}`);
-  revalidatePath("/spots");
+  revalidatePath("/huntsville/spots");
 }
 
 export async function submitSpotClaim(spotId: string, contactEmail: string, note: string) {
@@ -354,7 +354,7 @@ export async function decideSpotClaim(claimId: string, spotId: string, approve: 
     if (e2) throw new Error(e2.message);
   }
   revalidatePath("/admin");
-  revalidatePath(`/spots/${spotId}`);
+  revalidatePath(`/huntsville/spots/${spotId}`);
 }
 
 // --- Spot Tags ---
@@ -370,7 +370,7 @@ export async function saveSpotTag(id: string | null, name: string, sort: number)
     if (error) throw new Error(error.message);
   }
   revalidatePath("/admin");
-  revalidatePath("/spots");
+  revalidatePath("/huntsville/spots");
 }
 
 export async function deleteSpotTag(tagId: string) {
@@ -379,7 +379,7 @@ export async function deleteSpotTag(tagId: string) {
   const { error } = await supabase.from("spot_tags").delete().eq("id", tagId);
   if (error) throw new Error(error.message);
   revalidatePath("/admin");
-  revalidatePath("/spots");
+  revalidatePath("/huntsville/spots");
 }
 
 // --- Tags ---
@@ -395,8 +395,8 @@ export async function saveTag(id: string | null, name: string, sort: number) {
     if (error) throw new Error(error.message);
   }
   revalidatePath("/admin");
-  revalidatePath("/groups");
-  revalidatePath("/events");
+  revalidatePath("/huntsville/groups");
+  revalidatePath("/huntsville/events");
 }
 
 export async function deleteTag(tagId: string) {
@@ -405,8 +405,8 @@ export async function deleteTag(tagId: string) {
   const { error } = await supabase.from("tags").delete().eq("id", tagId);
   if (error) throw new Error(error.message);
   revalidatePath("/admin");
-  revalidatePath("/groups");
-  revalidatePath("/events");
+  revalidatePath("/huntsville/groups");
+  revalidatePath("/huntsville/events");
 }
 
 // --- Forum Sections ---
@@ -433,7 +433,7 @@ export async function saveForumSection(
     if (error) throw new Error(error.message);
   }
   revalidatePath("/admin");
-  revalidatePath("/forums");
+  revalidatePath("/huntsville/forums");
 }
 
 export async function deleteForumSection(sectionId: string) {
@@ -442,7 +442,7 @@ export async function deleteForumSection(sectionId: string) {
   const { error } = await supabase.from("forum_sections").delete().eq("id", sectionId);
   if (error) throw new Error(error.message);
   revalidatePath("/admin");
-  revalidatePath("/forums");
+  revalidatePath("/huntsville/forums");
 }
 
 // --- Broadcast notification ---

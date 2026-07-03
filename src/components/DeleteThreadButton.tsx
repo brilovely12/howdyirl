@@ -3,7 +3,7 @@
 import { useTransition } from "react";
 import { deleteThread } from "@/lib/actions";
 
-export default function DeleteThreadButton({ threadId, section }: { threadId: string; section: string }) {
+export default function DeleteThreadButton({ threadId, section, city }: { threadId: string; section: string; city: string }) {
   const [pending, start] = useTransition();
 
   return (
@@ -15,7 +15,7 @@ export default function DeleteThreadButton({ threadId, section }: { threadId: st
         if (!confirm("Delete this thread and all its replies?")) return;
         start(async () => {
           await deleteThread(threadId);
-          window.location.assign(`/forums/${section}`);
+          window.location.assign(`/${city}/forums/${section}`);
         });
       }}
     >

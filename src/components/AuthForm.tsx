@@ -6,7 +6,7 @@ import { normalizeHandle, handleError } from "@/lib/handle";
 
 type Mode = "login" | "signup";
 
-export default function AuthForm({ next = "/groups" }: { next?: string }) {
+export default function AuthForm({ next = "/huntsville/groups" }: { next?: string }) {
   const supabase = getBrowserClient();
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");

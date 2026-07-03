@@ -7,7 +7,7 @@ export default function NotFound() {
       <p style={{ color: "var(--ink-dim)", marginBottom: 20 }}>
         This page doesn't exist or has been removed.
       </p>
-      <Link className="btn" href="/groups" style={{ width: "auto", display: "inline-block" }}>
+      <Link className="btn" href="/huntsville/groups" style={{ width: "auto", display: "inline-block" }}>
         Back to groups
       </Link>
     </div>

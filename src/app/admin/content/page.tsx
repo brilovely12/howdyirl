@@ -12,7 +12,7 @@ export default async function ContentPage() {
       {content.map((c) => (
         <div key={`${c.type}-${c.id}`} className="row" style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ flex: 1 }}>
-            <Link href={`/${c.type}s/${c.id}`}>{c.name}</Link>
+            <Link href={`/huntsville/${c.type}s/${c.slug}`}>{c.name}</Link>
             <span style={{ fontSize: 11, color: "var(--ink-faint)" }}> {c.type}</span>
             {c.status !== "live" && (
               <span style={{

@@ -11,7 +11,7 @@ export default async function Header() {
   return (
     <header>
       <div className="topbar">
-        <Link href="/groups" className="brand" aria-label="Howdy IRL home">
+        <Link href="/huntsville/groups" className="brand" aria-label="Howdy IRL home">
           <span className="hw">howdy</span>
           <span className="irl">IRL</span>
           <span className="beta">BETA</span>

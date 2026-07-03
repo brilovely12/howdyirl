@@ -6,7 +6,7 @@ import { provisionMember } from "@/lib/auth";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/groups";
+  const next = searchParams.get("next") ?? "/huntsville/groups";
 
   if (code) {
     const supabase = await getServerClient();

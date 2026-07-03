@@ -1,12 +1,13 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { EventRow as EventRowType } from "@/lib/types";
 import { color, initials, eventDate, eventTime } from "@/lib/format";
 
-export default function EventRow({ event, index }: { event: EventRowType; index: number }) {
+export default function EventRow({ event, index, city }: { event: EventRowType; index: number; city: string }) {
   return (
-    <Link href={`/events/${event.id}`} className="row">
+    <Link href={`/${city}/events/${event.slug}`} className="row">
       {event.image_url ? (
-        <img className="thumb" src={event.image_url} alt="" style={{ objectFit: "cover" }} />
+        <Image className="thumb" src={event.image_url} alt={event.name} width={64} height={64} style={{ objectFit: "cover" }} />
       ) : (
         <div className="thumb" style={{ background: color(index + 3) }}>
           {initials(event.name)}

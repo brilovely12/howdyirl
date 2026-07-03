@@ -10,8 +10,8 @@ export default async function LoginPage({
   searchParams: Promise<{ next?: string }>;
 }) {
   const session = await getSessionUser();
-  if (session) redirect("/groups");
+  if (session) redirect("/huntsville/groups");
   const sp = await searchParams;
-  const next = sp.next || "/groups";
+  const next = sp.next || "/huntsville/groups";
   return <AuthForm next={next} />;
 }

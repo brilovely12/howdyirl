@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { getBrowserClient } from "@/lib/supabase/client";
 
-export default function ThreadForm({ section }: { section: string }) {
+export default function ThreadForm({ section, city }: { section: string; city: string }) {
   const supabase = getBrowserClient();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -27,7 +27,7 @@ export default function ThreadForm({ section }: { section: string }) {
       if (rpcErr.message.includes("no_member")) return window.location.assign("/onboarding");
       return setError("Couldn't post your thread. Please try again.");
     }
-    window.location.assign(`/forums/${section}/${data}`);
+    window.location.assign(`/${city}/forums/${section}/${data}`);
   }
 
   return (

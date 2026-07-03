@@ -31,11 +31,11 @@ export default async function MePage() {
         {myGroups.length ? (
           myGroups.map((g) => (
             <div className="meta" style={{ padding: "3px 0" }} key={g.id}>
-              ▸ <Link href={`/groups/${g.id}`}>{g.name}</Link>
+              ▸ <Link href={`/huntsville/groups/${g.slug}`}>{g.name}</Link>
             </div>
           ))
         ) : (
-          <div className="meta">None yet — browse <Link href="/groups">groups</Link> and join one.</div>
+          <div className="meta">None yet — browse <Link href="/huntsville/groups">groups</Link> and join one.</div>
         )}
       </div>
 
@@ -44,11 +44,11 @@ export default async function MePage() {
         {myRsvps.length ? (
           myRsvps.map((e) => (
             <div className="meta" style={{ padding: "3px 0" }} key={e.id}>
-              ▸ <Link href={`/events/${e.id}`}>{e.name}</Link> — {eventDate(e.starts_at)} · {eventTime(e.starts_at)}
+              ▸ <Link href={`/huntsville/events/${e.slug}`}>{e.name}</Link> — {eventDate(e.starts_at)} · {eventTime(e.starts_at)}
             </div>
           ))
         ) : (
-          <div className="meta">No RSVPs — check out <Link href="/events">upcoming events</Link>.</div>
+          <div className="meta">No RSVPs — check out <Link href="/huntsville/events">upcoming events</Link>.</div>
         )}
       </div>
 
@@ -57,7 +57,7 @@ export default async function MePage() {
           <h4>Groups you posted</h4>
           {created.map((g) => (
             <div className="meta" style={{ padding: "3px 0" }} key={g.id}>
-              ▸ <Link href={`/groups/${g.id}`}>{g.name}</Link>
+              ▸ <Link href={`/huntsville/groups/${g.slug}`}>{g.name}</Link>
             </div>
           ))}
         </div>

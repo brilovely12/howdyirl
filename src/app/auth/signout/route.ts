@@ -4,5 +4,5 @@ import { getServerClient } from "@/lib/supabase/server";
 export async function POST(request: NextRequest) {
   const supabase = await getServerClient();
   await supabase.auth.signOut();
-  return NextResponse.redirect(`${new URL(request.url).origin}/groups`, { status: 303 });
+  return NextResponse.redirect(`${new URL(request.url).origin}/huntsville/groups`, { status: 303 });
 }

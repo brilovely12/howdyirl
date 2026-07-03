@@ -11,7 +11,7 @@ export default async function OnboardingPage({
 }) {
   const session = await getSessionUser();
   if (!session) redirect("/login");
-  if (session.member) redirect("/groups");
+  if (session.member) redirect("/huntsville/groups");
   const sp = await searchParams;
   return <OnboardingForm taken={!!sp.taken} />;
 }

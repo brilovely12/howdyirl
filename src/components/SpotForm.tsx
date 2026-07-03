@@ -9,6 +9,7 @@ import ImagePicker from "./ImagePicker";
 
 type Existing = {
   id: string;
+  slug: string;
   name: string;
   description: string;
   address: string;
@@ -19,7 +20,7 @@ type Existing = {
   images: string[];
 };
 
-export default function SpotForm({ tags, existing }: { tags: Tag[]; existing?: Existing }) {
+export default function SpotForm({ tags, existing, city }: { tags: Tag[]; existing?: Existing; city: string }) {
   const supabase = getBrowserClient();
   const editing = !!existing;
   const [name, setName] = useState(existing?.name ?? "");
@@ -50,7 +51,7 @@ export default function SpotForm({ tags, existing }: { tags: Tag[]; existing?: E
           name, description, address, tags: selected, external_link: externalLink, link_label: linkLabel,
           image_url: imageUrl, images,
         });
-        window.location.assign(`/spots/${existing!.id}`);
+        window.location.assign(`/${city}/spots/${existing!.slug}`);
       });
       return;
     }
@@ -77,7 +78,7 @@ export default function SpotForm({ tags, existing }: { tags: Tag[]; existing?: E
       });
     }
     setBusy(false);
-    window.location.assign(`/spots/${data}`);
+    window.location.assign(`/${city}/spots/${data}`);
   }
 
   const loading = busy || pending;

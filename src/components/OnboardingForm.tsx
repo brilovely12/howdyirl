@@ -33,7 +33,7 @@ export default function OnboardingForm({ taken }: { taken?: boolean }) {
       return;
     }
     // PostgREST serializes a NULL composite as an all-null object, so check id.
-    if (data?.id) window.location.assign("/groups");
+    if (data?.id) window.location.assign("/huntsville/groups");
     else setError("Couldn't create your profile. Please try again.");
   }
 

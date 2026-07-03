@@ -18,7 +18,7 @@ const tabs = [
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getSessionUser();
-  if (!session?.member?.is_admin) redirect("/groups");
+  if (!session?.member?.is_admin) redirect("/huntsville/groups");
 
   return (
     <div style={{ maxWidth: 800 }}>
