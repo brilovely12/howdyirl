@@ -64,6 +64,7 @@ export default function GroupForm({ tags, existing, city }: { tags: Tag[]; exist
     });
     if (rpcErr) {
       setBusy(false);
+      console.error("create_group failed:", rpcErr);
       if (rpcErr.message.includes("not_authenticated")) return window.location.assign("/login");
       if (rpcErr.message.includes("no_member")) return window.location.assign("/onboarding");
       return setError("Couldn't post your group. Please try again.");

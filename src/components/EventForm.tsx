@@ -96,6 +96,7 @@ export default function EventForm({
     });
     if (rpcErr) {
       setBusy(false);
+      console.error("create_event failed:", rpcErr);
       if (rpcErr.message.includes("not_authenticated")) return window.location.assign("/login");
       if (rpcErr.message.includes("no_member")) return window.location.assign("/onboarding");
       if (rpcErr.message.includes("not_your_group"))

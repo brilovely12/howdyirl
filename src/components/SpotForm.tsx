@@ -67,6 +67,7 @@ export default function SpotForm({ tags, existing, city }: { tags: Tag[]; existi
     });
     if (rpcErr) {
       setBusy(false);
+      console.error("create_spot failed:", rpcErr);
       if (rpcErr.message.includes("not_authenticated")) return window.location.assign("/login");
       if (rpcErr.message.includes("no_member")) return window.location.assign("/onboarding");
       return setError("Couldn't post the spot. Please try again.");
