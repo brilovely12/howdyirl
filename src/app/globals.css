@@ -63,6 +63,8 @@ header{border-bottom:1px solid var(--rule);background:var(--panel)}
 .tab:hover{color:var(--ink);text-decoration:none}
 .tab.active{color:var(--ink);border-bottom-color:var(--amber)}
 .tab .ct{color:var(--ink-faint);font-size:11px;font-weight:400}
+.tab.soon{color:var(--ink-faint);cursor:default}
+.tab.soon:hover{color:var(--ink-faint)}
 
 /* Banner */
 .banner{background:var(--panel-2);border-bottom:1px solid var(--rule);font-size:11.5px;color:var(--ink-dim);padding:6px 0;font-family:var(--sans)}
@@ -109,6 +111,8 @@ main{padding:18px 0 60px;flex:1}
 /* List rows — connected bordered list, no floating cards */
 .row{display:grid;grid-template-columns:64px 1fr auto;gap:13px;align-items:start;padding:9px 10px;border:1px solid var(--rule);border-top:none;background:var(--panel);cursor:pointer;text-decoration:none;color:inherit}
 .row:hover{background:var(--panel-2);text-decoration:none}
+/* Thread rows have no thumbnail or date column — single full-width column */
+.row.thread{grid-template-columns:1fr;padding:11px 14px}
 /* Group/event avatars: rounded squares */
 .thumb{width:64px;height:64px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:21px;font-weight:700;color:#fff}
 .row .ttl{font-size:15px;color:var(--ink);font-weight:700;margin-bottom:2px}

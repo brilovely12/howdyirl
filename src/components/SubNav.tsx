@@ -30,12 +30,12 @@ export default function SubNav({
         <Link href={`/${city}/groups`} className={`tab${isGroups ? " active" : ""}`}>
           Groups <span className="ct">({counts.groups})</span>
         </Link>
-        <Link href={`/${city}/events`} className={`tab${isEvents ? " active" : ""}`}>
-          Events <span className="ct">({counts.events})</span>
-        </Link>
         <Link href={`/${city}/spots`} className={`tab${isSpots ? " active" : ""}`}>
           Spots <span className="ct">({counts.spots})</span>
         </Link>
+        <span className={`tab soon${isEvents ? " active" : ""}`} title="Events are coming soon">
+          Events <span className="ct">(coming soon)</span>
+        </span>
         <Link href={`/${city}/forums`} className={`tab${isForums ? " active" : ""}`}>
           Forums
         </Link>

@@ -53,8 +53,8 @@ export default async function SectionPage({
 
       {rows.length ? (
         rows.map((t) => (
-          <Link href={`/${city}/forums/${section}/${t.slug}`} className="row" key={t.id}>
-            <div style={{ flex: 1 }}>
+          <Link href={`/${city}/forums/${section}/${t.slug}`} className="row thread" key={t.id}>
+            <div>
               <div className="ttl">{t.title}</div>
               <div className="meta">
                 @{t.creator_handle}
