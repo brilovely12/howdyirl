@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getSpot, getSpotUpdates, getSpotEvents, getComments, isMemberOfSpot } from "@/lib/data";
+import { getSpot, getSpotUpdates, getSpotEvents, getComments, isMemberOfSpot, hasPendingClaim } from "@/lib/data";
 import { getSessionUser } from "@/lib/auth";
 import { color, initials, eventDate, eventTime, stamp } from "@/lib/format";
 import { externalHref } from "@/lib/url";
@@ -55,6 +55,8 @@ export default async function SpotDetail({ params }: { params: Promise<{ city: s
   const loggedIn = !!session;
   const saved = session?.member ? await isMemberOfSpot(session.member.id, spot.id) : false;
   const canEdit = isAdmin || (session?.member?.id === spot.creator_id);
+  const claimPending =
+    !spot.claimed && session?.member ? await hasPendingClaim({ spotId: spot.id }) : false;
 
   const link = externalHref(spot.external_link);
 
@@ -151,35 +153,29 @@ export default async function SpotDetail({ params }: { params: Promise<{ city: s
           </div>
         )}
 
-        <div className="upcoming">
-          <h4>upcoming events at this spot</h4>
-          {events.length ? (
-            events.map((e) => (
+        {events.length > 0 && (
+          <div className="upcoming">
+            <h4>upcoming events at this spot</h4>
+            {events.map((e) => (
               <div className="meta" style={{ padding: "3px 0" }} key={e.id}>
                 ▸ <Link href={`/${city}/events/${e.slug}`}>{e.name}</Link> — {eventDate(e.starts_at)} ·{" "}
                 {eventTime(e.starts_at)}
               </div>
-            ))
-          ) : (
-            <div className="meta">None scheduled</div>
-          )}
-        </div>
+            ))}
+          </div>
+        )}
 
-        <div className="upcoming">
-          <h4>announcements</h4>
-          {updates.length ? (
-            updates.map((u) => (
+        {updates.length > 0 && (
+          <div className="upcoming">
+            <h4>announcements</h4>
+            {updates.map((u) => (
               <div className="update" key={u.id}>
                 <div className="update-when">{stamp(u.posted_at)}</div>
                 <div className="update-text">{u.body}</div>
               </div>
-            ))
-          ) : (
-            <div className="meta">
-              No announcements yet{spot.claimed ? " — the owner can post one." : "."}
-            </div>
-          )}
-        </div>
+            ))}
+          </div>
+        )}
 
         <div className="actions">
           {spot.claimed ? (
@@ -190,7 +186,13 @@ export default async function SpotDetail({ params }: { params: Promise<{ city: s
             )
           ) : (
             loggedIn ? (
-              <SpotClaimForm spotId={spot.id} />
+              claimPending ? (
+                <span style={{ color: "var(--teal)", fontSize: 13, alignSelf: "center" }}>
+                  Claim submitted — pending review.
+                </span>
+              ) : (
+                <SpotClaimForm spotId={spot.id} />
+              )
             ) : (
               <Link className="btn ghost" href={`/login?next=/${city}/spots/${spot.slug}`}>I run this — Claim it</Link>
             )

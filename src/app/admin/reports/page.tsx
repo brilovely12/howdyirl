@@ -46,11 +46,12 @@ export default async function ReportsPage() {
           pendingClaims.map((c) => (
             <div key={c.id} className="row" style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <div style={{ flex: 1 }}>
-                <Link href={`/huntsville/groups/${c.group_slug}`}>{c.group_name}</Link>
+                <Link href={`/huntsville/${c.target_type}s/${c.target_slug}`}>{c.target_name}</Link>
+                <span style={{ color: "var(--ink-faint)", fontSize: 12 }}> ({c.target_type})</span>
                 {c.note && <div style={{ fontSize: 12, color: "var(--ink-dim)" }}>{c.note}</div>}
                 <div className="meta">by @{c.requested_by} · {c.contact_email} · {stamp(c.created_at)}</div>
               </div>
-              <ClaimActions id={c.id} groupId={c.group_id} />
+              <ClaimActions id={c.id} targetType={c.target_type} targetId={c.target_id} />
             </div>
           ))
         ) : (
@@ -78,7 +79,7 @@ export default async function ReportsPage() {
           </summary>
           {decidedClaims.map((c) => (
             <div key={c.id} className="meta" style={{ padding: "3px 0" }}>
-              {c.group_name} — {c.status} by @{c.requested_by} · {stamp(c.created_at)}
+              {c.target_name} — {c.status} by @{c.requested_by} · {stamp(c.created_at)}
             </div>
           ))}
         </details>

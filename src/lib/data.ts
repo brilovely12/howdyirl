@@ -415,6 +415,24 @@ export async function isMemberOfGroup(memberId: string, groupId: string): Promis
   return !!data;
 }
 
+/**
+ * Whether the current session's member has a pending claim on this group or
+ * spot. Uses the cookie-aware client — RLS lets members read only their own
+ * claim requests (own_read_claims policy).
+ */
+export async function hasPendingClaim(target: { groupId?: string; spotId?: string }): Promise<boolean> {
+  const { getServerClient } = await import("./supabase/server");
+  const db = await getServerClient();
+  let query = db
+    .from("claim_requests")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "pending");
+  if (target.groupId) query = query.eq("group_id", target.groupId);
+  if (target.spotId) query = query.eq("spot_id", target.spotId);
+  const { count } = await query;
+  return (count ?? 0) > 0;
+}
+
 export async function hasRsvp(memberId: string, eventId: string): Promise<boolean> {
   const db = howdyDb();
   const { data } = await db

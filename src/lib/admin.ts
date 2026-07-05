@@ -1,4 +1,4 @@
-import { howdyDb } from "./supabase";
+import { getServerClient } from "./supabase/server";
 
 export type Report = {
   id: string;
@@ -14,14 +14,17 @@ export type Report = {
 
 export type ClaimRequest = {
   id: string;
-  group_id: string;
+  group_id: string | null;
+  spot_id: string | null;
   requested_by: string | null;
   contact_email: string | null;
   note: string | null;
   status: string;
   created_at: string;
-  group_name?: string;
-  group_slug?: string;
+  target_type: "group" | "spot";
+  target_id: string;
+  target_name?: string;
+  target_slug?: string;
 };
 
 export type AdminMember = {
@@ -81,7 +84,7 @@ export type AdminContent = {
 // --- Stats ---
 
 export async function getAdminStats() {
-  const db = howdyDb();
+  const db = await getServerClient();
   const [members, groups, events, spots, openReports, openClaims, comments] = await Promise.all([
     db.from("members").select("id", { count: "exact", head: true }),
     db.from("groups").select("id", { count: "exact", head: true }).eq("status", "live"),
@@ -105,7 +108,7 @@ export async function getAdminStats() {
 // --- Reports ---
 
 export async function getReports(): Promise<Report[]> {
-  const db = howdyDb();
+  const db = await getServerClient();
   const { data } = await db
     .from("reports")
     .select("*")
@@ -125,7 +128,7 @@ export async function getReports(): Promise<Report[]> {
 // --- Claims ---
 
 export async function getClaims(): Promise<ClaimRequest[]> {
-  const db = howdyDb();
+  const db = await getServerClient();
   const { data } = await db
     .from("claim_requests")
     .select("*")
@@ -134,9 +137,12 @@ export async function getClaims(): Promise<ClaimRequest[]> {
 
   const claims = (data ?? []) as ClaimRequest[];
   for (const c of claims) {
-    const { data: group } = await db.from("groups").select("name,slug").eq("id", c.group_id).maybeSingle();
-    c.group_name = (group as any)?.name ?? "Unknown";
-    c.group_slug = (group as any)?.slug ?? c.group_id;
+    c.target_type = c.spot_id ? "spot" : "group";
+    c.target_id = (c.spot_id ?? c.group_id)!;
+    const table = c.target_type === "spot" ? "spots" : "groups";
+    const { data: target } = await db.from(table).select("name,slug").eq("id", c.target_id).maybeSingle();
+    c.target_name = (target as any)?.name ?? "Unknown";
+    c.target_slug = (target as any)?.slug ?? c.target_id;
   }
   return claims;
 }
@@ -144,7 +150,7 @@ export async function getClaims(): Promise<ClaimRequest[]> {
 // --- Members ---
 
 export async function getMembers(q?: string): Promise<AdminMember[]> {
-  const db = howdyDb();
+  const db = await getServerClient();
   let query = db
     .from("members")
     .select("id, handle, email, is_admin, banned, joined_at")
@@ -160,7 +166,7 @@ export async function getMembers(q?: string): Promise<AdminMember[]> {
 // --- Comments ---
 
 export async function getRecentComments(): Promise<AdminComment[]> {
-  const db = howdyDb();
+  const db = await getServerClient();
   const { data } = await db
     .from("comments")
     .select("id, target_type, target_id, author_handle, body, created_at")
@@ -179,7 +185,7 @@ export async function getRecentComments(): Promise<AdminComment[]> {
 // --- Content (groups + events + spots) ---
 
 export async function getAdminContent(): Promise<AdminContent[]> {
-  const db = howdyDb();
+  const db = await getServerClient();
   const [{ data: groups }, { data: events }, { data: spots }] = await Promise.all([
     db.from("groups").select("id, slug, name, status, creator_handle, created_at").order("created_at", { ascending: false }).limit(50),
     db.from("events").select("id, slug, name, status, creator_handle, created_at").order("created_at", { ascending: false }).limit(50),
@@ -197,7 +203,7 @@ export async function getAdminContent(): Promise<AdminContent[]> {
 // --- Pages ---
 
 export async function getAdminPages(): Promise<AdminPage[]> {
-  const db = howdyDb();
+  const db = await getServerClient();
   const { data } = await db
     .from("pages")
     .select("id, title, slug, body, in_nav, is_rules, status, updated_at")
@@ -208,7 +214,7 @@ export async function getAdminPages(): Promise<AdminPage[]> {
 // --- Tags ---
 
 export async function getAdminTags(): Promise<AdminTag[]> {
-  const db = howdyDb();
+  const db = await getServerClient();
   const { data } = await db
     .from("tags")
     .select("id, name, sort")
@@ -219,7 +225,7 @@ export async function getAdminTags(): Promise<AdminTag[]> {
 // --- Spot Tags ---
 
 export async function getAdminSpotTags(): Promise<AdminTag[]> {
-  const db = howdyDb();
+  const db = await getServerClient();
   const { data } = await db
     .from("spot_tags")
     .select("id, name, sort")
@@ -230,7 +236,7 @@ export async function getAdminSpotTags(): Promise<AdminTag[]> {
 // --- Forum Sections ---
 
 export async function getAdminForumSections(): Promise<AdminForumSection[]> {
-  const db = howdyDb();
+  const db = await getServerClient();
   const { data } = await db
     .from("forum_sections")
     .select("id, slug, label, description, sort")
@@ -241,7 +247,7 @@ export async function getAdminForumSections(): Promise<AdminForumSection[]> {
 // --- Activity feed ---
 
 export async function getRecentActivity() {
-  const db = howdyDb();
+  const db = await getServerClient();
   const [{ data: newMembers }, { data: newGroups }, { data: newEvents }, { data: newComments }] = await Promise.all([
     db.from("members").select("handle, joined_at").order("joined_at", { ascending: false }).limit(10),
     db.from("groups").select("id, slug, name, created_at").order("created_at", { ascending: false }).limit(10),

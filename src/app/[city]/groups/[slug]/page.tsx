@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getGroup, getGroupUpdates, getGroupEvents, getComments, isMemberOfGroup } from "@/lib/data";
+import { getGroup, getGroupUpdates, getGroupEvents, getComments, isMemberOfGroup, hasPendingClaim } from "@/lib/data";
 import { getSessionUser } from "@/lib/auth";
 import { color, initials, eventDate, eventTime, stamp } from "@/lib/format";
 import { externalHref } from "@/lib/url";
@@ -55,6 +55,8 @@ export default async function GroupDetail({ params }: { params: Promise<{ city: 
   const loggedIn = !!session;
   const joined = session?.member ? await isMemberOfGroup(session.member.id, group.id) : false;
   const canEdit = isAdmin || (session?.member?.id === group.creator_id);
+  const claimPending =
+    !group.claimed && session?.member ? await hasPendingClaim({ groupId: group.id }) : false;
 
   const link = externalHref(group.external_link);
 
@@ -141,35 +143,29 @@ export default async function GroupDetail({ params }: { params: Promise<{ city: 
           </div>
         )}
 
-        <div className="upcoming">
-          <h4>upcoming events from this group</h4>
-          {events.length ? (
-            events.map((e) => (
+        {events.length > 0 && (
+          <div className="upcoming">
+            <h4>upcoming events from this group</h4>
+            {events.map((e) => (
               <div className="meta" style={{ padding: "3px 0" }} key={e.id}>
                 ▸ <Link href={`/${city}/events/${e.slug}`}>{e.name}</Link> — {eventDate(e.starts_at)} ·{" "}
                 {eventTime(e.starts_at)}
               </div>
-            ))
-          ) : (
-            <div className="meta">None scheduled</div>
-          )}
-        </div>
+            ))}
+          </div>
+        )}
 
-        <div className="upcoming">
-          <h4>updates &amp; announcements</h4>
-          {updates.length ? (
-            updates.map((u) => (
+        {updates.length > 0 && (
+          <div className="upcoming">
+            <h4>updates &amp; announcements</h4>
+            {updates.map((u) => (
               <div className="update" key={u.id}>
                 <div className="update-when">{stamp(u.posted_at)}</div>
                 <div className="update-text">{u.body}</div>
               </div>
-            ))
-          ) : (
-            <div className="meta">
-              No updates yet{group.claimed ? " — the organizer can post one." : "."}
-            </div>
-          )}
-        </div>
+            ))}
+          </div>
+        )}
 
         <div className="actions">
           {group.claimed ? (
@@ -180,7 +176,13 @@ export default async function GroupDetail({ params }: { params: Promise<{ city: 
             )
           ) : (
             loggedIn ? (
-              <ClaimForm groupId={group.id} />
+              claimPending ? (
+                <span style={{ color: "var(--teal)", fontSize: 13, alignSelf: "center" }}>
+                  Claim submitted — pending review.
+                </span>
+              ) : (
+                <ClaimForm groupId={group.id} />
+              )
             ) : (
               <Link className="btn ghost" href={`/login?next=/${city}/groups/${group.slug}`}>I run this — Claim it</Link>
             )
