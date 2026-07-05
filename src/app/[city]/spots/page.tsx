@@ -51,11 +51,11 @@ export default async function SpotsPage({
   return (
     <div className="layout">
       <aside className="side">
-        <h4>tags</h4>
-        <TagChips basePath={`/${city}/spots`} tags={tags} activeTags={activeTags} q={q} />
-        <a className="btn post" href={postHref}>
+        <a className="btn post" href={postHref} style={{ marginBottom: 18 }}>
           + Add a Spot
         </a>
+        <h4>tags</h4>
+        <TagChips basePath={`/${city}/spots`} tags={tags} activeTags={activeTags} q={q} />
       </aside>
 
       <section>
