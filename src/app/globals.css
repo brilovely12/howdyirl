@@ -87,6 +87,16 @@ main{padding:18px 0 60px;flex:1}
 .btn.post{background:var(--panel-2);color:var(--blue-hi);border-color:var(--blue);font-weight:600}
 .btn.post:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
 
+/* Search + post CTA row: on mobile the post button sits beside search, above the fold */
+.searchrow{display:flex;gap:8px;margin-bottom:12px;align-items:stretch}
+.searchrow .searchbar{flex:1;margin-bottom:0}
+.searchrow .btn.post{display:none;width:auto;white-space:nowrap}
+@media(max-width:680px){
+  .searchrow .searchbar{flex:1 1 50%}
+  .searchrow .btn.post{display:flex;align-items:center;justify-content:center;flex:1 1 50%;padding:9px 8px;font-size:13px}
+  .side .btn.post{display:none}
+}
+
 /* Search */
 .searchbar{position:relative;margin-bottom:12px}
 .searchbar input{width:100%;background:var(--panel);border:1px solid var(--rule);color:var(--ink);padding:9px 32px 9px 12px;border-radius:3px;font-family:var(--sans);font-size:13px}
@@ -99,14 +109,17 @@ main{padding:18px 0 60px;flex:1}
 /* Section header bars (phpBB style) */
 .listhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:0;background:var(--panel-2);border:1px solid var(--rule);padding:7px 11px;gap:4px 8px;position:relative}
 .listhead h1,.listhead h2{font-size:13px;margin:0;font-family:var(--sans);font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.8px}
-.listhead .sort{font-size:11px;color:var(--ink-faint);font-family:var(--sans);display:flex;align-items:center}
+.listhead .sort{font-size:11px;color:var(--ink-faint);font-family:var(--sans);display:flex;align-items:center;gap:4px}
+.sort select{background:transparent;border:none;color:var(--ink-faint);font-family:var(--sans);font-size:11px;cursor:pointer;padding:2px 0}
+.sort select:hover,.sort select:focus{color:var(--ink);outline:none}
+.sort select option{background:var(--panel-2);color:var(--ink)}
 .filter-toggle{display:none;background:none;border:1px solid var(--rule);border-radius:3px;padding:3px 7px;cursor:pointer;color:var(--ink-dim);position:relative;line-height:1;margin-left:auto}
 .filter-toggle svg{display:block}
 .filter-badge{position:absolute;top:-5px;right:-5px;background:var(--blue);color:#fff;font-size:9px;font-weight:700;width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--sans)}
 .filter-drawer{flex-basis:100%;padding:8px 0 4px;border-top:1px solid var(--rule);margin-top:4px}
 .sort-icon{display:none}
 .filter-drawer{display:none}
-@media(max-width:680px){.filter-toggle{display:flex;align-items:center}.filter-drawer{display:block}.sort .sort-label{display:none}.sort-icon{display:inline}}
+@media(max-width:680px){.filter-toggle{display:flex;align-items:center}.filter-drawer{display:block}.sort-icon{display:inline}.sort select{font-size:16px}}
 
 /* List rows — connected bordered list, no floating cards */
 .row{display:grid;grid-template-columns:64px 1fr auto;gap:13px;align-items:start;padding:9px 10px;border:1px solid var(--rule);border-top:none;background:var(--panel);cursor:pointer;text-decoration:none;color:inherit}

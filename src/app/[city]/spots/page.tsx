@@ -15,10 +15,11 @@ import TagChips from "@/components/TagChips";
 import FilterToggle from "@/components/FilterToggle";
 import SpotRow from "@/components/SpotRow";
 import Pager from "@/components/Pager";
+import SortSelect from "@/components/SortSelect";
 
 export const dynamic = "force-dynamic";
 
-type SP = { q?: string; tag?: string; page?: string };
+type SP = { q?: string; tag?: string; page?: string; sort?: string };
 
 export default async function SpotsPage({
   params,
@@ -32,9 +33,10 @@ export default async function SpotsPage({
   const q = sp.q?.trim() || undefined;
   const activeTags = sp.tag ? sp.tag.split(",").filter(Boolean) : [];
   const page = Math.max(1, parseInt(sp.page ?? "1", 10) || 1);
+  const sort = sp.sort === "new" ? ("new" as const) : ("updated" as const);
 
   const [{ rows, total }, tags, session] = await Promise.all([
-    searchSpots({ q, tags: activeTags.length ? activeTags : undefined, page }),
+    searchSpots({ q, tags: activeTags.length ? activeTags : undefined, page, sort }),
     listSpotTags(),
     getSessionUser(),
   ]);
@@ -57,16 +59,16 @@ export default async function SpotsPage({
       </aside>
 
       <section>
-        <SearchBox placeholder="Search spots…" />
+        <div className="searchrow">
+          <SearchBox placeholder="Search spots…" />
+          <a className="btn post" href={postHref}>+ Add a Spot</a>
+        </div>
         <div className="listhead">
           <h1>local spots</h1>
           <FilterToggle activeCount={activeTags.length}>
             <TagChips basePath={`/${city}/spots`} tags={tags} activeTags={activeTags} q={q} />
           </FilterToggle>
-          <span className="sort">
-            <svg className="sort-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M4 3v10M4 13l-2.5-3M4 13l2.5-3M12 13V3M12 3l-2.5 3M12 3l2.5 3" /></svg>
-            <span className="sort-label">Sort: Recently updated ▾</span>
-          </span>
+          <SortSelect />
         </div>
 
         {rows.length ? (

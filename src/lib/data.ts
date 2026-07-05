@@ -48,13 +48,13 @@ const EVENT_COLS =
 const SPOT_COLS =
   "id,slug,creator_id,creator_handle,name,description,address,claimed,joins_count,external_link,link_label,image_url,images,tags,status,updated_at";
 
-export type ListParams = { q?: string; tags?: string[]; page?: number; when?: string };
+export type ListParams = { q?: string; tags?: string[]; page?: number; when?: string; sort?: "updated" | "new" };
 
 /**
  * Groups list with server-side search. Combines (AND) the text query with the
  * active tag filter, keeps the existing "recently updated" sort, and paginates.
  */
-export async function searchGroups({ q, tags, page = 1 }: ListParams): Promise<SearchResult<Group>> {
+export async function searchGroups({ q, tags, page = 1, sort = "updated" }: ListParams): Promise<SearchResult<Group>> {
   const cityId = await getCityId();
   if (!cityId) return { rows: [], total: 0 };
 
@@ -69,7 +69,8 @@ export async function searchGroups({ q, tags, page = 1 }: ListParams): Promise<S
   for (const term of queryTerms(q)) query = query.ilike("search_text", likePattern(term));
 
   const from = (page - 1) * PAGE_SIZE;
-  query = query.order("updated_at", { ascending: false }).range(from, from + PAGE_SIZE - 1);
+  const orderCol = sort === "new" ? "created_at" : "updated_at";
+  query = query.order(orderCol, { ascending: false }).range(from, from + PAGE_SIZE - 1);
 
   const { data, count } = await query;
   return { rows: (data ?? []) as Group[], total: count ?? 0 };
@@ -181,7 +182,7 @@ export const listCounts = cache(async (): Promise<{ groups: number; events: numb
 
 // --- Spots ---
 
-export async function searchSpots({ q, tags, page = 1 }: ListParams): Promise<SearchResult<Spot>> {
+export async function searchSpots({ q, tags, page = 1, sort = "updated" }: ListParams): Promise<SearchResult<Spot>> {
   const cityId = await getCityId();
   if (!cityId) return { rows: [], total: 0 };
 
@@ -196,7 +197,8 @@ export async function searchSpots({ q, tags, page = 1 }: ListParams): Promise<Se
   for (const term of queryTerms(q)) query = query.ilike("search_text", likePattern(term));
 
   const from = (page - 1) * PAGE_SIZE;
-  query = query.order("updated_at", { ascending: false }).range(from, from + PAGE_SIZE - 1);
+  const orderCol = sort === "new" ? "created_at" : "updated_at";
+  query = query.order(orderCol, { ascending: false }).range(from, from + PAGE_SIZE - 1);
 
   const { data, count } = await query;
   return { rows: (data ?? []) as Spot[], total: count ?? 0 };

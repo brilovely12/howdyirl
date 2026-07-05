@@ -6,10 +6,11 @@ import TagChips from "@/components/TagChips";
 import FilterToggle from "@/components/FilterToggle";
 import GroupRow from "@/components/GroupRow";
 import Pager from "@/components/Pager";
+import SortSelect from "@/components/SortSelect";
 
 export const dynamic = "force-dynamic";
 
-type SP = { q?: string; tag?: string; page?: string };
+type SP = { q?: string; tag?: string; page?: string; sort?: string };
 
 export async function generateMetadata({ params }: { params: Promise<{ city: string }> }): Promise<Metadata> {
   const { city } = await params;
@@ -32,9 +33,10 @@ export default async function GroupsPage({
   const q = sp.q?.trim() || undefined;
   const activeTags = sp.tag ? sp.tag.split(",").filter(Boolean) : [];
   const page = Math.max(1, parseInt(sp.page ?? "1", 10) || 1);
+  const sort = sp.sort === "new" ? ("new" as const) : ("updated" as const);
 
   const [{ rows, total }, tags, session] = await Promise.all([
-    searchGroups({ q, tags: activeTags.length ? activeTags : undefined, page }),
+    searchGroups({ q, tags: activeTags.length ? activeTags : undefined, page, sort }),
     listTags(),
     getSessionUser(),
   ]);
@@ -57,16 +59,16 @@ export default async function GroupsPage({
       </aside>
 
       <section>
-        <SearchBox placeholder="Search groups…" />
+        <div className="searchrow">
+          <SearchBox placeholder="Search groups…" />
+          <a className="btn post" href={postHref}>+ Post a Group</a>
+        </div>
         <div className="listhead">
           <h1>local groups</h1>
           <FilterToggle activeCount={activeTags.length}>
             <TagChips basePath={`/${city}/groups`} tags={tags} activeTags={activeTags} q={q} />
           </FilterToggle>
-          <span className="sort">
-            <svg className="sort-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M4 3v10M4 13l-2.5-3M4 13l2.5-3M12 13V3M12 3l-2.5 3M12 3l2.5 3" /></svg>
-            <span className="sort-label">Sort: Recently updated ▾</span>
-          </span>
+          <SortSelect />
         </div>
 
         {rows.length ? (
