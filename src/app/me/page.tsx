@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
-import { getMyGroups, getMyRsvps, getGroupsByCreator } from "@/lib/data";
-import { eventDate, eventTime } from "@/lib/format";
+import { getGroupsByCreator } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
@@ -12,11 +11,9 @@ export default async function MePage() {
   const { user, member } = session;
   if (!member) redirect("/onboarding");
 
-  const [myGroups, myRsvps, created] = await Promise.all([
-    getMyGroups(member.id),
-    getMyRsvps(member.id),
-    getGroupsByCreator(member.id),
-  ]);
+  // Membership features (joined groups, RSVPs) are hidden while Howdy runs as
+  // a pure listing site — this page is just listing management for now.
+  const created = await getGroupsByCreator(member.id);
 
   return (
     <div className="detail" style={{ maxWidth: 560 }}>
@@ -27,41 +24,20 @@ export default async function MePage() {
       </div>
 
       <div className="upcoming">
-        <h4>Groups you've joined</h4>
-        {myGroups.length ? (
-          myGroups.map((g) => (
+        <h4>Groups you posted</h4>
+        {created.length ? (
+          created.map((g) => (
             <div className="meta" style={{ padding: "3px 0" }} key={g.id}>
               ▸ <Link href={`/huntsville/groups/${g.slug}`}>{g.name}</Link>
             </div>
           ))
         ) : (
-          <div className="meta">None yet — browse <Link href="/huntsville/groups">groups</Link> and join one.</div>
+          <div className="meta">
+            None yet — <Link href="/huntsville/groups/new">post a group</Link> or{" "}
+            <Link href="/huntsville/spots/new">add a spot</Link>.
+          </div>
         )}
       </div>
-
-      <div className="upcoming">
-        <h4>Your RSVPs</h4>
-        {myRsvps.length ? (
-          myRsvps.map((e) => (
-            <div className="meta" style={{ padding: "3px 0" }} key={e.id}>
-              ▸ <Link href={`/huntsville/events/${e.slug}`}>{e.name}</Link> — {eventDate(e.starts_at)} · {eventTime(e.starts_at)}
-            </div>
-          ))
-        ) : (
-          <div className="meta">No RSVPs — check out <Link href="/huntsville/events">upcoming events</Link>.</div>
-        )}
-      </div>
-
-      {created.length > 0 && (
-        <div className="upcoming">
-          <h4>Groups you posted</h4>
-          {created.map((g) => (
-            <div className="meta" style={{ padding: "3px 0" }} key={g.id}>
-              ▸ <Link href={`/huntsville/groups/${g.slug}`}>{g.name}</Link>
-            </div>
-          ))}
-        </div>
-      )}
 
       <div style={{ marginTop: 24 }}>
         <Link href="/notifications">View notifications</Link>

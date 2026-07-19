@@ -2,12 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getEvent, getEventUpdates, getComments, hasRsvp } from "@/lib/data";
+import { getEvent, getEventUpdates, getComments } from "@/lib/data";
 import { getSessionUser } from "@/lib/auth";
 import { color, initials, eventDate, eventTime, stamp } from "@/lib/format";
 import { externalHref } from "@/lib/url";
 import Comments from "@/components/Comments";
-import RsvpButton from "@/components/RsvpButton";
 import ReportButton from "@/components/ReportButton";
 import AdminBar from "@/components/AdminBar";
 
@@ -50,7 +49,6 @@ export default async function EventDetail({ params }: { params: Promise<{ city: 
     getComments("event", event.id),
   ]);
   const loggedIn = !!session;
-  const rsvped = session?.member ? await hasRsvp(session.member.id, event.id) : false;
   const canEdit = isAdmin || (session?.member?.id === event.creator_id);
 
   const link = externalHref(event.external_link);
@@ -162,11 +160,7 @@ export default async function EventDetail({ params }: { params: Promise<{ city: 
         )}
 
         <div className="actions">
-          {loggedIn ? (
-            <RsvpButton eventId={event.id} rsvped={rsvped} />
-          ) : (
-            <Link className="btn" href={`/login?next=/${city}/events/${event.slug}`}>RSVP</Link>
-          )}
+          {/* RSVP is hidden while Howdy runs as a pure listing site. */}
           {loggedIn ? (
             <ReportButton targetType="event" targetId={event.id} />
           ) : (

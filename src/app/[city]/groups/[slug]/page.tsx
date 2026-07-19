@@ -2,13 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getGroup, getGroupUpdates, getGroupEvents, getComments, isMemberOfGroup, hasPendingClaim } from "@/lib/data";
+import { getGroup, getGroupUpdates, getGroupEvents, getComments, hasPendingClaim } from "@/lib/data";
 import { getSessionUser } from "@/lib/auth";
 import { color, initials, eventDate, eventTime, stamp } from "@/lib/format";
 import { externalHref } from "@/lib/url";
 import CheckBadge from "@/components/CheckBadge";
 import Comments from "@/components/Comments";
-import JoinButton from "@/components/JoinButton";
 import ClaimForm from "@/components/ClaimForm";
 import ReportButton from "@/components/ReportButton";
 import AdminBar from "@/components/AdminBar";
@@ -53,7 +52,6 @@ export default async function GroupDetail({ params }: { params: Promise<{ city: 
     getComments("group", group.id),
   ]);
   const loggedIn = !!session;
-  const joined = session?.member ? await isMemberOfGroup(session.member.id, group.id) : false;
   const canEdit = isAdmin || (session?.member?.id === group.creator_id);
   const claimPending =
     !group.claimed && session?.member ? await hasPendingClaim({ groupId: group.id }) : false;
@@ -168,13 +166,8 @@ export default async function GroupDetail({ params }: { params: Promise<{ city: 
         )}
 
         <div className="actions">
-          {group.claimed ? (
-            loggedIn ? (
-              <JoinButton groupId={group.id} joined={joined} />
-            ) : (
-              <Link className="btn" href={`/login?next=/${city}/groups/${group.slug}`}>Join this group</Link>
-            )
-          ) : (
+          {/* Membership is hidden while Howdy runs as a pure listing site. */}
+          {group.claimed ? null : (
             loggedIn ? (
               claimPending ? (
                 <span style={{ color: "var(--teal)", fontSize: 13, alignSelf: "center" }}>

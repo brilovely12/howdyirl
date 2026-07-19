@@ -21,7 +21,7 @@ export default function GroupRow({ group, index, city }: { group: Group; index: 
         </div>
         <div className="desc">{group.description}</div>
         <div className="meta">
-          {group.joins_count} members<span className="dot">·</span>updated {relTime(group.updated_at)}
+          updated {relTime(group.updated_at)}
         </div>
         <div className="topics-row">
           {group.tags.map((t) => (

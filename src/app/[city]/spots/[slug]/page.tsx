@@ -2,13 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getSpot, getSpotUpdates, getSpotEvents, getComments, isMemberOfSpot, hasPendingClaim } from "@/lib/data";
+import { getSpot, getSpotUpdates, getSpotEvents, getComments, hasPendingClaim } from "@/lib/data";
 import { getSessionUser } from "@/lib/auth";
 import { color, initials, eventDate, eventTime, stamp } from "@/lib/format";
 import { externalHref } from "@/lib/url";
 import CheckBadge from "@/components/CheckBadge";
 import Comments from "@/components/Comments";
-import SaveSpotButton from "@/components/SaveSpotButton";
 import SpotClaimForm from "@/components/SpotClaimForm";
 import ReportButton from "@/components/ReportButton";
 import AdminBar from "@/components/AdminBar";
@@ -53,7 +52,6 @@ export default async function SpotDetail({ params }: { params: Promise<{ city: s
     getComments("spot", spot.id),
   ]);
   const loggedIn = !!session;
-  const saved = session?.member ? await isMemberOfSpot(session.member.id, spot.id) : false;
   const canEdit = isAdmin || (session?.member?.id === spot.creator_id);
   const claimPending =
     !spot.claimed && session?.member ? await hasPendingClaim({ spotId: spot.id }) : false;
@@ -123,7 +121,7 @@ export default async function SpotDetail({ params }: { params: Promise<{ city: s
             </div>
             {!spot.claimed && (
               <p style={{ color: "var(--ink-faint)", fontSize: 12 }}>
-                This listing was added by a community member. Info may be out of
+                This listing was added by the community. Info may be out of
                 date. Are you the owner? You can claim it.
               </p>
             )}
@@ -178,13 +176,8 @@ export default async function SpotDetail({ params }: { params: Promise<{ city: s
         )}
 
         <div className="actions">
-          {spot.claimed ? (
-            loggedIn ? (
-              <SaveSpotButton spotId={spot.id} saved={saved} />
-            ) : (
-              <Link className="btn" href={`/login?next=/${city}/spots/${spot.slug}`}>Save this spot</Link>
-            )
-          ) : (
+          {/* Membership is hidden while Howdy runs as a pure listing site. */}
+          {spot.claimed ? null : (
             loggedIn ? (
               claimPending ? (
                 <span style={{ color: "var(--teal)", fontSize: 13, alignSelf: "center" }}>
