@@ -18,17 +18,17 @@ export async function proxy(request: NextRequest) {
   // an otherwise-valid session.
   if (request.method !== "GET") return response;
 
-  // TEMP: identify the traffic source hammering the site (observability bill).
-  if (request.nextUrl.pathname === "/huntsville/groups") {
-    console.log(
-      "traffic-audit",
-      JSON.stringify({
-        ua: request.headers.get("user-agent"),
-        ip: request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip"),
-        ref: request.headers.get("referer"),
-        purpose: request.headers.get("purpose") ?? request.headers.get("sec-purpose"),
-      }),
-    );
+  // Crawlers were walking the combinatorial ?tag=/?q=/?page= URL space
+  // millions of times a day (GPTBot, meta-externalagent, Amazonbot, …).
+  // robots.txt disallows /*? for compliant bots; this is the cheap backstop —
+  // reject parameterized list URLs from any known crawler before doing any
+  // work, so no page function runs and no DB queries fire. Clean URLs stay
+  // fully crawlable.
+  if (request.nextUrl.search) {
+    const ua = request.headers.get("user-agent") ?? "";
+    if (/bot|crawl|spider|slurp|externalagent|externalhit/i.test(ua)) {
+      return new NextResponse("Parameterized URLs are not crawlable. See /robots.txt.", { status: 403 });
+    }
   }
 
   const supabase = createServerClient(url, anon, {
