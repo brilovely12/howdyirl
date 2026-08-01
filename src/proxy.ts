@@ -18,17 +18,18 @@ export async function proxy(request: NextRequest) {
   // an otherwise-valid session.
   if (request.method !== "GET") return response;
 
-  // Crawlers were walking the combinatorial ?tag=/?q=/?page= URL space
-  // millions of times a day (GPTBot, meta-externalagent, Amazonbot, …).
-  // robots.txt disallows /*? for compliant bots; this is the cheap backstop —
-  // reject parameterized list URLs from any known crawler before doing any
-  // work, so no page function runs and no DB queries fire. Clean URLs stay
-  // fully crawlable.
-  if (request.nextUrl.search) {
-    const ua = request.headers.get("user-agent") ?? "";
-    if (/bot|crawl|spider|slurp|externalagent|externalhit/i.test(ua)) {
-      return new NextResponse("Parameterized URLs are not crawlable. See /robots.txt.", { status: 403 });
-    }
+  // Crawler cost control (they were 1.6M requests/day — see robots.ts):
+  // 1. AI training crawlers are banned site-wide.
+  // 2. Any crawler hitting a parameterized URL (the combinatorial
+  //    ?tag=/?q=/?page= space) is rejected.
+  // Both fire before Supabase or the page function, so blocked requests cost
+  // only the middleware invocation. Clean URLs stay crawlable for search.
+  const ua = request.headers.get("user-agent") ?? "";
+  if (/GPTBot|meta-external|Amazonbot|Bytespider|PetalBot|CCBot|ClaudeBot/i.test(ua)) {
+    return new NextResponse("AI crawling is not permitted. See /robots.txt.", { status: 403 });
+  }
+  if (request.nextUrl.search && /bot|crawl|spider|slurp|externalagent|externalhit/i.test(ua)) {
+    return new NextResponse("Parameterized URLs are not crawlable. See /robots.txt.", { status: 403 });
   }
 
   const supabase = createServerClient(url, anon, {
