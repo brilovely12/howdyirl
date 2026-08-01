@@ -18,6 +18,19 @@ export async function proxy(request: NextRequest) {
   // an otherwise-valid session.
   if (request.method !== "GET") return response;
 
+  // TEMP: identify the traffic source hammering the site (observability bill).
+  if (request.nextUrl.pathname === "/huntsville/groups") {
+    console.log(
+      "traffic-audit",
+      JSON.stringify({
+        ua: request.headers.get("user-agent"),
+        ip: request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip"),
+        ref: request.headers.get("referer"),
+        purpose: request.headers.get("purpose") ?? request.headers.get("sec-purpose"),
+      }),
+    );
+  }
+
   const supabase = createServerClient(url, anon, {
     cookies: {
       getAll() {
